@@ -2,15 +2,16 @@ package trace
 
 import (
 	"context"
+	"fmt"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
 	"reflect"
 )
 
-func Start(ctx context.Context, name string, args ...any) (context.Context, trace.Span) {
+func Start(ctx context.Context, name string, args ...any) (context.Context, Span) {
 	ctx, span := otel.Tracer("").Start(ctx, name)
-	context.WithValue(ctx, "traceCtx", span.SpanContext().TraceID().String())
 
 	for _, arg := range args {
 		v := reflect.ValueOf(arg)
@@ -19,7 +20,7 @@ func Start(ctx context.Context, name string, args ...any) (context.Context, trac
 		setAttr(span, key, value)
 	}
 
-	return ctx, span
+	return ctx, NewSpan(span)
 }
 
 func setAttr(span trace.Span, key string, val reflect.Value) {
@@ -43,4 +44,38 @@ func setAttr(span trace.Span, key string, val reflect.Value) {
 	default:
 		span.SetAttributes(attribute.String(key, "complex interface"))
 	}
+}
+
+type Span struct {
+	s trace.Span
+}
+
+func NewSpan(s trace.Span) Span {
+	return Span{s: s}
+}
+
+func (s *Span) End() {
+	s.s.End()
+}
+
+func (s *Span) AddAttr(key string, val any) {
+	v := reflect.ValueOf(val)
+	setAttr(s.s, key, v)
+}
+
+func (s *Span) GetTraceId() string {
+	return s.s.SpanContext().TraceID().String()
+}
+
+func (s *Span) Error(err error) error {
+	if err == nil {
+		return nil
+	}
+	s.s.SetStatus(codes.Error, fmt.Sprintf("%+v", err))
+	s.s.RecordError(err)
+	return err
+}
+
+func (s *Span) SetName(name string) {
+	s.s.SetName(name)
 }

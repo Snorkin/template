@@ -32,7 +32,7 @@ func NewUserHttpHandlers(
 
 func (h UserHttpHandler) GetUserByLogin() fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		ctx, ok := c.Locals("traceCtx").(context.Context)
+		ctx, ok := c.Locals("traceId").(context.Context)
 		if !ok {
 			return e.NewCustomError(codes.InvalidArgument, "No trace provided")
 		}
@@ -45,7 +45,7 @@ func (h UserHttpHandler) GetUserByLogin() fiber.Handler {
 			return err //default errors placeholder
 		}
 
-		res, err := h.usecase.GetUserByLogin(c.UserContext(), cnv.GetUserByLoginReqDlvrToUc(req))
+		res, err := h.usecase.GetUserByLogin(ctx, cnv.GetUserByLoginReqDlvrToUc(req))
 		if err != nil {
 			return err
 		}
@@ -56,7 +56,7 @@ func (h UserHttpHandler) GetUserByLogin() fiber.Handler {
 
 func (h UserHttpHandler) CreateUser() fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		ctx, ok := c.Locals("traceCtx").(context.Context)
+		ctx, ok := c.Locals("traceId").(context.Context)
 		if !ok {
 			return e.NewCustomError(codes.InvalidArgument, "No trace provided")
 		}
@@ -69,7 +69,7 @@ func (h UserHttpHandler) CreateUser() fiber.Handler {
 			return err //default errors placeholder
 		}
 
-		res, err := h.usecase.CreateUser(c.UserContext(), cnv.CreateUserReqDlvrToUc(req))
+		res, err := h.usecase.CreateUser(ctx, cnv.CreateUserReqDlvrToUc(req))
 		if err != nil {
 			return err
 		}

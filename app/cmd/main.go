@@ -63,8 +63,9 @@ func main() {
 }
 
 type dependencies struct {
-	pg *sqlx.DB
-	tp *trace.TracerProvider
+	pg  *sqlx.DB
+	tp  *trace.TracerProvider
+	exp *jaeger.Exporter
 }
 
 func initDeps(ctx context.Context) *dependencies {
@@ -106,7 +107,7 @@ func initDeps(ctx context.Context) *dependencies {
 	}
 
 	// postgres
-	pgDB, err := postgres.InitPsqlDB(ctx, cfg.Postgres)
+	pgDB, err := postgres.InitPsqlDB()
 	if err != nil {
 		logger.Log.Fatalf("PostgreSQL init error: %s", err)
 	} else {
@@ -114,8 +115,9 @@ func initDeps(ctx context.Context) *dependencies {
 	}
 
 	return &dependencies{
-		pg: pgDB,
-		tp: tp,
+		pg:  pgDB,
+		tp:  tp,
+		exp: exporter,
 	}
 }
 
@@ -134,6 +136,14 @@ func (d *dependencies) close() {
 			logger.Log.Error(err)
 		} else {
 			logger.Log.Info("Trace provider resolved")
+		}
+	}
+	if d.exp != nil {
+		err := d.exp.Shutdown(context.Background())
+		if err != nil {
+			logger.Log.Error(err)
+		} else {
+			logger.Log.Info("Exporter resolved")
 		}
 	}
 	logger.Log.Info("All dependencies resolved")

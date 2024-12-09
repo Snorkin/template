@@ -5,7 +5,6 @@ import (
 	"example/pkg/logger"
 	sentryfiber "github.com/getsentry/sentry-go/fiber"
 	"github.com/gofiber/fiber/v2"
-	fiberLogger "github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -29,10 +28,6 @@ func (s *Server) Run() error {
 	s.http.Use(sentryfiber.New(sentryfiber.Options{
 		Repanic:         true,
 		WaitForDelivery: true,
-	}))
-
-	s.http.Use(fiberLogger.New(fiberLogger.Config{
-		Format: "[${ip}]:${port} ${pid} ${locals:requestid} ${status} - ${method} ${path}​\n",
 	}))
 
 	if err := s.MapHandlers(); err != nil {

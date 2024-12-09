@@ -1,17 +1,22 @@
 package middleware
 
 import (
+	"context"
+	e "example/pkg/errors"
+	"example/pkg/errors/codes"
 	"example/pkg/tracing"
 	"github.com/gofiber/fiber/v2"
 )
 
 func (m *MdwManager) NotAuthedMiddleware() fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		ctx, span := trace.Start(c.Context(), "MdwManager.NotAuthedMiddleware")
-		defer span.End()
+		ctx, ok := c.Locals("traceId").(context.Context)
+		if !ok {
+			return e.NewCustomError(codes.InvalidArgument, "No trace provided")
+		}
 
-		c.Set("traceCtx", span.SpanContext().TraceID().String())
-		c.Locals("traceCtx", ctx)
+		ctx, span := trace.Start(ctx, "MdwManager.NotAuthedMiddleware")
+		defer span.End()
 
 		return c.Next()
 	}
