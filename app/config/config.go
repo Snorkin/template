@@ -32,7 +32,8 @@ type Jaeger struct {
 }
 
 type Sentry struct {
-	Dsn string `validate:"required"`
+	Enabled bool
+	Dsn     string `validate:"required_if=Enabled true"`
 }
 
 type Logger struct {

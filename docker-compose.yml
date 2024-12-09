@@ -32,85 +32,15 @@ services:
     volumes:
       - grafana-data:/var/lib/grafana
 
-  # Sentry for error tracking
-  sentry:
-    image: getsentry/sentry:latest
-    container_name: sentry
-    platform: linux/amd64
-    ports:
-      - "9000:9000"  # UI
-    environment:
-      - SENTRY_SECRET_KEY=gxv7-ucv)(t1suxz&_xdisp(9_z5vem(k9!64x&mxto^@j@b@w
-      - SENTRY_POSTGRES_HOST=postgres
-      - SENTRY_REDIS_HOST=redis
-      - SENTRY_SNUBA_HOST=snuba
-      - SENTRY_CLICKHOUSE_HOST=clickhouse
-      - SENTRY_KAFKA_HOST=kafka
-    depends_on:
-      - postgres
-      - redis
-      - snuba
-      - clickhouse
-      - kafka
-
-  # Postgres for Sentry
   postgres:
     image: postgres:12
-    container_name: sentry-postgres
+    container_name: postgres
     environment:
-      - POSTGRES_USER=sentry
-      - POSTGRES_PASSWORD=sentry
-      - POSTGRES_DB=sentry
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
     volumes:
-      - sentry-postgres-data:/var/lib/postgresql/data
-
-  # Redis for Sentry
-  redis:
-    image: redis:latest
-    container_name: sentry-redis
-    volumes:
-      - sentry-redis-data:/data
-
-  # Snuba for time series data
-  snuba:
-    image: getsentry/snuba:latest
-    container_name: snuba
-    environment:
-      - CLICKHOUSE_HOST=clickhouse
-    depends_on:
-      - clickhouse
-      - kafka
-
-  # ClickHouse for Snuba
-  clickhouse:
-    image: clickhouse/clickhouse-server:latest
-    container_name: clickhouse
-    ports:
-      - "8123:8123"  # HTTP interface
-      - "9009:9009"  # Native interface
-
-  # Kafka for Snuba event processing
-  kafka:
-    image: wurstmeister/kafka:latest
-    container_name: kafka
-    environment:
-      - KAFKA_ADVERTISED_LISTENER=PLAINTEXT://kafka:9093
-      - KAFKA_LISTENER_SECURITY_PROTOCOL=PLAINTEXT
-      - KAFKA_LISTENER_NAME=PLAINTEXT
-      - KAFKA_LISTENER_PORT=9093
-      - KAFKA_LISTENER_INTERNAL=PLAINTEXT://kafka:9092
-      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
-    ports:
-      - "9093:9093"
-
-  # Zookeeper for Kafka
-  zookeeper:
-    image: wurstmeister/zookeeper:latest
-    container_name: zookeeper
-    ports:
-      - "2181:2181"
-
+      - postgres-data:/var/lib/postgresql/data
 volumes:
   grafana-data:
-  sentry-postgres-data:
-  sentry-redis-data:
+  postgres-data:

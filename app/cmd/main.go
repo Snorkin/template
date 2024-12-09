@@ -92,16 +92,18 @@ func initDeps(ctx context.Context) *dependencies {
 	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(propagation.TraceContext{}, propagation.Baggage{}))
 
 	//sentry
-	err = sentry.Init(sentry.ClientOptions{
-		Dsn:              cfg.Sentry.Dsn,
-		TracesSampleRate: 0.15,
-	})
-	if err != nil {
-		logger.Log.Fatalf("Sentry init error: %s", err)
-	} else {
-		logger.Log.Info("Sentry connected")
+	if cfg.Sentry.Enabled {
+		err = sentry.Init(sentry.ClientOptions{
+			Dsn:              cfg.Sentry.Dsn,
+			TracesSampleRate: 0.15,
+		})
+		if err != nil {
+			logger.Log.Fatalf("Sentry init error: %s", err)
+		} else {
+			logger.Log.Info("Sentry connected")
+		}
+		defer sentry.Flush(time.Second * 5)
 	}
-	defer sentry.Flush(time.Second * 5)
 
 	// postgres
 	pgDB, err := postgres.InitPsqlDB(ctx, cfg.Postgres)
