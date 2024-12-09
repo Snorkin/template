@@ -13,10 +13,13 @@ const (
 	extension     = "json"
 )
 
+var cfg *Config
+
 type Config struct {
 	Server      Server
 	Logger      Logger
 	Jaeger      Jaeger
+	Sentry      Sentry
 	Postgres    Postgres
 	Environment string `validate:"required,oneof=dev stage prod"`
 }
@@ -26,6 +29,10 @@ type Jaeger struct {
 	Password    string `validate:"required"`
 	Username    string `validate:"required"`
 	ServiceName string `validate:"required"`
+}
+
+type Sentry struct {
+	Dsn string `validate:"required"`
 }
 
 type Logger struct {
@@ -64,7 +71,11 @@ type Postgres struct {
 	}
 }
 
-func LoadConfig() (Config, error) {
+func GetConfig() *Config {
+	return cfg
+}
+
+func LoadConfig() {
 	var res Config
 
 	v := viper.New()
@@ -73,17 +84,16 @@ func LoadConfig() (Config, error) {
 	v.SetConfigType(extension)
 
 	if err := v.ReadInConfig(); err != nil {
-		return res, err
+		log.Fatalf("Failed to load config from disc, %v", err)
 	}
 
 	if err := v.Unmarshal(&res); err != nil {
-		log.Fatalf("Unable to decode into struct, %v", err)
-		return res, err
+		log.Fatalf("Unable to parse config into struct, %v", err)
 	}
 
 	if err := validator.New().Struct(res); err != nil {
-		return res, err
+		log.Fatalf("Failed to validate struct, %v", err)
 	}
 
-	return res, nil
+	cfg = &res
 }

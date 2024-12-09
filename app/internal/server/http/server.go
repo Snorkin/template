@@ -3,39 +3,46 @@ package http
 import (
 	"example/config"
 	"example/pkg/logger"
+	sentryfiber "github.com/getsentry/sentry-go/fiber"
 	"github.com/gofiber/fiber/v2"
+	fiberLogger "github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/jmoiron/sqlx"
 )
 
 type Server struct {
-	cfg  config.Config
-	log  logger.Logger
 	db   *sqlx.DB
 	http *fiber.App
 }
 
 func NewServer(
-	cfg config.Config,
-	log logger.Logger,
 	db *sqlx.DB,
 ) *Server {
 	return &Server{
 		http: fiber.New(fiber.Config{DisableStartupMessage: true}),
-		cfg:  cfg,
-		log:  log,
 		db:   db,
 	}
 }
 
 func (s *Server) Run() error {
+	cfg := config.GetConfig()
+
+	s.http.Use(sentryfiber.New(sentryfiber.Options{
+		Repanic:         true,
+		WaitForDelivery: true,
+	}))
+
+	s.http.Use(fiberLogger.New(fiberLogger.Config{
+		Format: "[${ip}]:${port} ${pid} ${locals:requestid} ${status} - ${method} ${path}​\n",
+	}))
+
 	if err := s.MapHandlers(); err != nil {
-		s.log.Fatalf("Cannot map handlers: %s", err)
+		logger.Log.Fatalf("Cannot map handlers: %s", err)
 	}
 
 	go func() {
-		s.log.Infof("HTTP server started on: %s:%s", s.cfg.Server.Http.Host, s.cfg.Server.Http.Port)
-		if err := s.http.Listen(s.cfg.Server.Http.Host + ":" + s.cfg.Server.Http.Port); err != nil {
-			s.log.Fatalf("Error starting HTTP server: %s", err)
+		logger.Log.Infof("HTTP server started on: %s:%s", cfg.Server.Http.Host, cfg.Server.Http.Port)
+		if err := s.http.Listen(cfg.Server.Http.Host + ":" + cfg.Server.Http.Port); err != nil {
+			logger.Log.Fatalf("Error starting HTTP server: %s", err)
 		}
 	}()
 
@@ -45,8 +52,8 @@ func (s *Server) Run() error {
 func (s *Server) Shutdown() {
 	err := s.http.Shutdown()
 	if err != nil {
-		s.log.Error(err)
+		logger.Log.Error(err)
 	} else {
-		s.log.Info("HTTP server resolved")
+		logger.Log.Info("HTTP server resolved")
 	}
 }

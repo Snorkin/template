@@ -2,22 +2,23 @@ package repository
 
 import (
 	"context"
-	"example/internal/user"
-	model "example/internal/user/infra/repository/model"
-	"example/pkg/logger"
+	"example/internal/user/infra/repository/model"
 	trace "example/pkg/tracing"
 	"github.com/jmoiron/sqlx"
 )
 
-type UserRepository struct {
-	log logger.Logger
-	db  *sqlx.DB
+type Repository interface {
+	CreateUser(ctx context.Context, req model.CreateUserReq) (model.CreateUserRes, error)
+	GetUserByLogin(ctx context.Context, req model.GetUserByLoginReq) (model.GetUserByLoginRes, error)
 }
 
-func NewUserRepository(log logger.Logger, db *sqlx.DB) user.Repository {
+type UserRepository struct {
+	db *sqlx.DB
+}
+
+func NewUserRepository(db *sqlx.DB) *UserRepository {
 	return &UserRepository{
-		log: log,
-		db:  db,
+		db: db,
 	}
 }
 

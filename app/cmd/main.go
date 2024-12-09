@@ -7,6 +7,8 @@ import (
 	"example/internal/server/http"
 	"example/pkg/logger"
 	"example/pkg/storage/postgres"
+	"github.com/getsentry/sentry-go"
+	"github.com/gofiber/fiber/v2/log"
 	"github.com/jmoiron/sqlx"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/jaeger"
@@ -18,40 +20,38 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 )
 
 func main() {
 	stdLog.Println("Starting service")
 
 	//init config
-	cfg, err := config.LoadConfig()
-	if err != nil {
-		stdLog.Fatalf("Failed to load config %s", err.Error())
-	}
+	config.LoadConfig()
 	stdLog.Println("Config loaded")
 
 	//init logger
-	log := logger.NewLogger(cfg)
-	log.Info("Logger initialized")
+	logger.InitLogger()
+	logger.Log.Info("Logger initialized")
 	ctx := context.Background()
 
 	// app dependencies
-	deps := initDeps(ctx, cfg, log)
-	defer deps.close(log)
+	deps := initDeps(ctx)
+	defer deps.close()
 
 	// start http server
-	httpSrv := http.NewServer(cfg, log, deps.pg)
-	err = httpSrv.Run()
+	httpSrv := http.NewServer(deps.pg)
+	err := httpSrv.Run()
 	if err != nil {
-		log.Fatalf("Failed to start HTTP server: %s", err)
+		logger.Log.Fatalf("Failed to start HTTP server: %s", err)
 	}
 	defer httpSrv.Shutdown()
 
 	// start grpc server
-	grpcSrv := grpc.NewServer(cfg, log, deps.pg)
+	grpcSrv := grpc.NewServer(deps.pg)
 	err = grpcSrv.Run()
 	if err != nil {
-		log.Fatalf("Failed to start GRPC server: %s", err)
+		logger.Log.Fatalf("Failed to start GRPC server: %s", err)
 	}
 	defer grpcSrv.Shutdown()
 
@@ -67,7 +67,8 @@ type dependencies struct {
 	tp *trace.TracerProvider
 }
 
-func initDeps(ctx context.Context, cfg config.Config, log logger.Logger) *dependencies {
+func initDeps(ctx context.Context) *dependencies {
+	cfg := config.GetConfig()
 	//tracing
 	exporter, err := jaeger.New(
 		jaeger.WithCollectorEndpoint(
@@ -90,12 +91,24 @@ func initDeps(ctx context.Context, cfg config.Config, log logger.Logger) *depend
 	otel.SetTracerProvider(tp)
 	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(propagation.TraceContext{}, propagation.Baggage{}))
 
+	//sentry
+	err = sentry.Init(sentry.ClientOptions{
+		Dsn:              cfg.Sentry.Dsn,
+		TracesSampleRate: 0.15,
+	})
+	if err != nil {
+		logger.Log.Fatalf("Sentry init error: %s", err)
+	} else {
+		logger.Log.Info("Sentry connected")
+	}
+	defer sentry.Flush(time.Second * 5)
+
 	// postgres
 	pgDB, err := postgres.InitPsqlDB(ctx, cfg.Postgres)
 	if err != nil {
-		log.Fatalf("PostgreSQL init error: %s", err)
+		logger.Log.Fatalf("PostgreSQL init error: %s", err)
 	} else {
-		log.Infof("PostgreSQL connected")
+		logger.Log.Infof("PostgreSQL connected")
 	}
 
 	return &dependencies{
@@ -104,22 +117,22 @@ func initDeps(ctx context.Context, cfg config.Config, log logger.Logger) *depend
 	}
 }
 
-func (d *dependencies) close(log logger.Logger) {
+func (d *dependencies) close() {
 	if d.pg != nil {
 		err := d.pg.Close()
 		if err != nil {
-			log.Error(err)
+			logger.Log.Error(err)
 		} else {
-			log.Info("PostgreSQL connection resolved")
+			logger.Log.Info("PostgreSQL connection resolved")
 		}
 	}
 	if d.tp != nil {
 		err := d.tp.Shutdown(context.Background())
 		if err != nil {
-			log.Error(err)
+			logger.Log.Error(err)
 		} else {
-			log.Info("Trace provider resolved")
+			logger.Log.Info("Trace provider resolved")
 		}
 	}
-	log.Info("All dependencies resolved")
+	logger.Log.Info("All dependencies resolved")
 }

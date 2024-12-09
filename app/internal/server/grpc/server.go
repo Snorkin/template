@@ -13,29 +13,23 @@ import (
 )
 
 type Server struct {
-	cfg  config.Config
-	log  logger.Logger
 	db   *sqlx.DB
 	grpc *grpc.Server
 }
 
 func NewServer(
-	cfg config.Config,
-	log logger.Logger,
 	db *sqlx.DB,
 ) *Server {
 	return &Server{
 		grpc: grpc.NewServer(grpc.ChainUnaryInterceptor(
 			recovery.UnaryServerInterceptor([]recovery.Option{
 				recovery.WithRecoveryHandler(func(p interface{}) (err error) {
-					log.Errorf("Recovered from panic %v", p)
+					logger.Log.Errorf("Recovered from panic %v", p)
 					return status.Errorf(codes.Internal, "internal error")
 				})}...),
 		),
 		),
-		cfg: cfg,
-		log: log,
-		db:  db,
+		db: db,
 	}
 }
 
@@ -43,19 +37,21 @@ func (s *Server) Run() error {
 	//register GRPC servers
 	s.MapHandlers()
 
-	if s.cfg.Environment == "dev" {
+	cfg := config.GetConfig()
+
+	if cfg.Environment == "dev" {
 		reflection.Register(s.grpc)
 	}
 
-	l, err := net.Listen("tcp", s.cfg.Server.Grpc.Host+":"+s.cfg.Server.Grpc.Port)
+	l, err := net.Listen("tcp", cfg.Server.Grpc.Host+":"+cfg.Server.Grpc.Port)
 	if err != nil {
 		return err
 	}
 
 	go func() {
-		s.log.Infof("GRPC Server started on: %s:%s", s.cfg.Server.Grpc.Host, s.cfg.Server.Grpc.Port)
+		logger.Log.Infof("GRPC Server started on: %s:%s", cfg.Server.Grpc.Host, cfg.Server.Grpc.Port)
 		if err := s.grpc.Serve(l); err != nil {
-			s.log.Errorf("Error starting GRPC server: %s", err)
+			logger.Log.Errorf("Error starting GRPC server: %s", err)
 		}
 	}()
 
@@ -64,5 +60,5 @@ func (s *Server) Run() error {
 
 func (s *Server) Shutdown() {
 	s.grpc.GracefulStop()
-	s.log.Info("GRPC server resolved")
+	logger.Log.Info("GRPC server resolved")
 }

@@ -9,16 +9,16 @@ import (
 
 func (s *Server) MapHandlers() error {
 	//repositories
-	userRepo := userRepository.NewUserRepository(s.log, s.db)
+	userRepo := userRepository.NewUserRepository(s.db)
 
 	//usecases
-	userU := userUsecase.NewUserUsecase(s.cfg, s.log, userRepo)
+	userU := userUsecase.NewUserUsecase(userRepo)
 
 	//handlers
-	userH := userHandler.NewUserHttpHandlers(s.cfg, s.log, userU)
+	userH := userHandler.NewUserHttpHandlers(userU)
 
 	//middleware
-	mdw := middleware.NewMdwManager(s.cfg, s.log)
+	mdw := middleware.NewMdwManager()
 
 	//routes
 	userR := s.http.Group("user")

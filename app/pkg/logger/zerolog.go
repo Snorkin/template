@@ -17,17 +17,19 @@ var loggerLevelMap = map[string]zerolog.Level{
 	"disabled": zerolog.Disabled,
 }
 
+var Log *appLogger
+
 type appLogger struct {
-	cfg    config.Config
 	logger *zerolog.Logger
 }
 
-func NewLogger(cfg config.Config) Logger {
-	return &appLogger{cfg: cfg, logger: initLogger(cfg)}
+func InitLogger() {
+	Log = &appLogger{logger: initLogger()}
 }
 
 // TODO: add env check
-func initLogger(cfg config.Config) *zerolog.Logger {
+func initLogger() *zerolog.Logger {
+	cfg := config.GetConfig()
 	w := zerolog.MultiLevelWriter(zerolog.ConsoleWriter{Out: os.Stdout})
 	logger := zerolog.New(w).Level(loggerLevelMap[cfg.Logger.Level]).With().
 		CallerWithSkipFrameCount(cfg.Logger.SkipFrameCount).Timestamp().Logger()

@@ -10,13 +10,13 @@ import (
 func (s *Server) MapHandlers() {
 
 	//repositories
-	userR := userRepository.NewUserRepository(s.log, s.db)
+	userR := userRepository.NewUserRepository(s.db)
 
 	//usecases
-	userU := userUsecase.NewUserUsecase(s.cfg, s.log, userR)
+	userU := userUsecase.NewUserUsecase(userR)
 
 	//handlers
-	userH := userHandler.NewUserHandlers(s.cfg, s.log, userU)
+	userH := userHandler.NewUserHandlers(userU)
 
 	//register handlers
 	pbUser.RegisterUserServiceServer(s.grpc, userH)

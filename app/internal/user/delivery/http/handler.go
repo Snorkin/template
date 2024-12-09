@@ -2,37 +2,35 @@ package http
 
 import (
 	"context"
-	"example/config"
-	"example/internal/user"
 	cnv "example/internal/user/delivery/converter/http"
 	"example/internal/user/delivery/model"
+	user "example/internal/user/usecase"
 	e "example/pkg/errors"
 	"example/pkg/errors/codes"
-	"example/pkg/logger"
 	trace "example/pkg/tracing"
 	"example/pkg/validator"
 	"github.com/gofiber/fiber/v2"
 )
 
-type Handler struct {
-	cfg     config.Config
+// Handler all driver adapters (http/grpc calls, etc)
+type Handler interface {
+	GetUserByLogin() fiber.Handler
+	CreateUser() fiber.Handler
+}
+
+type UserHttpHandler struct {
 	usecase user.Usecase
-	log     logger.Logger
 }
 
 func NewUserHttpHandlers(
-	cfg config.Config,
-	log logger.Logger,
 	usecase user.Usecase,
-) user.HttpHandler {
-	return &Handler{
-		cfg:     cfg,
-		log:     log,
+) *UserHttpHandler {
+	return &UserHttpHandler{
 		usecase: usecase,
 	}
 }
 
-func (h Handler) GetUserByLogin() fiber.Handler {
+func (h UserHttpHandler) GetUserByLogin() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		ctx, ok := c.Locals("traceCtx").(context.Context)
 		if !ok {
@@ -56,7 +54,7 @@ func (h Handler) GetUserByLogin() fiber.Handler {
 	}
 }
 
-func (h Handler) CreateUser() fiber.Handler {
+func (h UserHttpHandler) CreateUser() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		ctx, ok := c.Locals("traceCtx").(context.Context)
 		if !ok {

@@ -2,33 +2,31 @@ package usecase
 
 import (
 	"context"
-	"example/config"
-	"example/internal/user"
+	repo "example/internal/user/infra/repository"
 	cnv "example/internal/user/usecase/converter"
 	"example/internal/user/usecase/model"
-	"example/pkg/logger"
 	"example/pkg/tracing"
 )
 
-type userUsecase struct {
-	cfg  config.Config
-	log  logger.Logger
-	repo user.Repository
+// Usecase main buiseness logic of application
+type Usecase interface {
+	CreateUser(ctx context.Context, req model.CreateUserReq) (model.User, error)
+	GetUserByLogin(ctx context.Context, req model.GetUserByLoginReq) (model.User, error)
+}
+
+type UserUsecase struct {
+	repo repo.Repository
 }
 
 func NewUserUsecase(
-	cfg config.Config,
-	log logger.Logger,
-	repo user.Repository,
-) user.Usecase {
-	return &userUsecase{
-		cfg:  cfg,
-		log:  log,
+	repo repo.Repository,
+) *UserUsecase {
+	return &UserUsecase{
 		repo: repo,
 	}
 }
 
-func (u userUsecase) GetUserByLogin(ctx context.Context, req model.GetUserByLoginReq) (model.User, error) {
+func (u UserUsecase) GetUserByLogin(ctx context.Context, req model.GetUserByLoginReq) (model.User, error) {
 	ctx, span := trace.Start(ctx, "user.Usecase.GetUserByLogin", req)
 	defer span.End()
 
@@ -40,7 +38,7 @@ func (u userUsecase) GetUserByLogin(ctx context.Context, req model.GetUserByLogi
 	return cnv.GetUserByLoginResRepoToUc(res), nil
 }
 
-func (u userUsecase) CreateUser(ctx context.Context, req model.CreateUserReq) (model.User, error) {
+func (u UserUsecase) CreateUser(ctx context.Context, req model.CreateUserReq) (model.User, error) {
 	ctx, span := trace.Start(ctx, "user.Usecase.CreateUser", req)
 	defer span.End()
 

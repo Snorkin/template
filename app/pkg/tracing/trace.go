@@ -40,7 +40,6 @@ func setAttr(span trace.Span, key string, val reflect.Value) {
 			value := val.Field(i)
 			setAttr(span, key, value)
 		}
-
 	default:
 		span.SetAttributes(attribute.String(key, "complex interface"))
 	}
