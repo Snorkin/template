@@ -8,6 +8,7 @@ import (
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
 	"reflect"
+	"strings"
 )
 
 func Start(ctx context.Context, name string, args ...any) (context.Context, Span) {
@@ -37,12 +38,18 @@ func setAttr(span trace.Span, key string, val reflect.Value) {
 		span.SetAttributes(attribute.Bool(key, val.Bool()))
 	case reflect.Struct:
 		for i := 0; i < val.NumField(); i++ {
-			key := val.Type().Field(i).Name
+			key := key + "." + val.Type().Field(i).Name
 			value := val.Field(i)
 			setAttr(span, key, value)
 		}
+	case reflect.Slice:
+		var res []string
+		for i := 0; i < val.Len(); i++ {
+			res = append(res, fmt.Sprintf("%v", val.Index(i).Interface()))
+		}
+		span.SetAttributes(attribute.String(key, strings.Join(res, ", ")))
 	default:
-		span.SetAttributes(attribute.String(key, "complex interface"))
+		span.SetAttributes(attribute.String(key, "unsupported type"))
 	}
 }
 
