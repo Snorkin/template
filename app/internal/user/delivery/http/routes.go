@@ -7,5 +7,5 @@ import (
 
 func MapUserRoutes(userRoutes fiber.Router, mdw middleware.MdwManager, h Handler) {
 	userRoutes.Get("/:login", mdw.NotAuthedMiddleware(), mdw.Sentry(), h.GetUserByLogin())
-	userRoutes.Post("/", mdw.NotAuthedMiddleware(), h.CreateUser())
+	userRoutes.Post("/", mdw.NotAuthedMiddleware(), mdw.Sentry(), h.CreateUser())
 }
