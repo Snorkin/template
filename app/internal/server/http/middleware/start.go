@@ -23,7 +23,7 @@ func (m *MdwManager) Start() fiber.Handler {
 		c.Response().Header.Set(traceIdHeader, span.GetTraceId())
 
 		if err := c.Next(); err != nil {
-			logger.Log.Errorf("TraceID: %s :%v", span.GetTraceId(), err)
+			logger.Log.Errorf("TraceID: %s Error: %s", span.GetTraceId(), err)
 			return span.Error(err)
 
 		}
