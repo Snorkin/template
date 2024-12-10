@@ -16,14 +16,13 @@ const (
 	tagIgnoreVal = "ignore"
 )
 
-// Maps all argument types including structs, slices and primitives. For sensetive info you can use trace:"ignore" tag to not include it in span
+// Start Maps all argument types including structs, slices and primitives. For sensetive info you can use trace:"ignore" tag to not include field in span
 func Start(ctx context.Context, name string, args ...any) (context.Context, Span) {
 	ctx, span := otel.Tracer("").Start(ctx, name)
 
 	for _, arg := range args {
-		v := reflect.ValueOf(arg)
-		key := v.Type().Name()
-		value := v
+		value := reflect.ValueOf(arg)
+		key := value.Type().Name()
 		setAttr(span, key, value)
 	}
 
