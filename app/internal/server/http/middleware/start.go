@@ -22,12 +22,6 @@ func (m *MdwManager) Start() fiber.Handler {
 		c.SetUserContext(ctx)
 		c.Response().Header.Set(traceIdHeader, span.GetTraceId())
 
-		if err := c.Next(); err != nil {
-			logger.Log.Errorf("TraceID: %s Error: %s", span.GetTraceId(), err)
-			return span.Error(err)
-
-		}
-
 		span.Set("traceId", span.GetTraceId())
 		span.Set("remoteIP", c.IP())
 		span.Set("method", c.Method())
@@ -38,6 +32,12 @@ func (m *MdwManager) Start() fiber.Handler {
 		span.Set("content-type", c.Get(fiber.HeaderContentType))
 		span.Set("fiber-version", fiber.Version)
 		span.Set("status-code", c.Response().StatusCode())
+
+		if err := c.Next(); err != nil {
+			logger.Log.Errorf("TraceID: %s Error: %s", span.GetTraceId(), err)
+			return span.Error(err)
+
+		}
 
 		return nil
 	}
