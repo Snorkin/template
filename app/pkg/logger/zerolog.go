@@ -33,6 +33,7 @@ func initLogger() *zerolog.Logger {
 	w := zerolog.MultiLevelWriter(zerolog.ConsoleWriter{Out: os.Stdout})
 	logger := zerolog.New(w).Level(loggerLevelMap[cfg.Logger.Level]).With().
 		CallerWithSkipFrameCount(cfg.Logger.SkipFrameCount).Timestamp().Logger()
+	logger.Info().Msgf("Logger initialized: level - %s", cfg.Logger.Level)
 	return &logger
 }
 

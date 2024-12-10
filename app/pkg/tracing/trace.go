@@ -26,9 +26,7 @@ func Start(ctx context.Context, name string, args ...any) (context.Context, Span
 
 func setAttr(span trace.Span, key string, val reflect.Value) {
 	switch val.Kind() {
-	case reflect.Int:
-		span.SetAttributes(attribute.Int(key, int(val.Int())))
-	case reflect.Int64:
+	case reflect.Int, reflect.Int64:
 		span.SetAttributes(attribute.Int64(key, val.Int()))
 	case reflect.Float64:
 		span.SetAttributes(attribute.Float64(key, val.Float()))
@@ -65,7 +63,7 @@ func (s *Span) End() {
 	s.s.End()
 }
 
-func (s *Span) AddAttr(key string, val any) {
+func (s *Span) Set(key string, val any) {
 	v := reflect.ValueOf(val)
 	setAttr(s.s, key, v)
 }

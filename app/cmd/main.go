@@ -8,7 +8,6 @@ import (
 	"example/pkg/logger"
 	"example/pkg/storage/postgres"
 	"github.com/getsentry/sentry-go"
-	"github.com/gofiber/fiber/v2/log"
 	"github.com/jmoiron/sqlx"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/jaeger"
@@ -32,11 +31,9 @@ func main() {
 
 	//init logger
 	logger.InitLogger()
-	logger.Log.Info("Logger initialized")
-	ctx := context.Background()
 
 	// app dependencies
-	deps := initDeps(ctx)
+	deps := initDeps()
 	defer deps.close()
 
 	// start http server
@@ -59,7 +56,7 @@ func main() {
 	signal.Notify(exitCh, os.Interrupt, syscall.SIGTERM)
 	<-exitCh
 
-	log.Info("App is gracefully stopped")
+	logger.Log.Info("App is gracefully stopped")
 }
 
 type dependencies struct {
@@ -68,7 +65,7 @@ type dependencies struct {
 	exp *jaeger.Exporter
 }
 
-func initDeps(ctx context.Context) *dependencies {
+func initDeps() *dependencies {
 	cfg := config.GetConfig()
 	//tracing
 	exporter, err := jaeger.New(
@@ -79,7 +76,7 @@ func initDeps(ctx context.Context) *dependencies {
 		),
 	)
 	if err != nil {
-		log.Fatalf("Cannot create Jaeger exporter: %s", err)
+		logger.Log.Fatalf("Cannot create Jaeger exporter: %s", err)
 	}
 
 	tp := trace.NewTracerProvider(
