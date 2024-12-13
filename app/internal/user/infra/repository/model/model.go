@@ -1,7 +1,7 @@
 package model
 
 type CreateUserReq struct {
-	Name  string
+	Name  string `trace:"ignore"`
 	Email string
 	Login string
 }

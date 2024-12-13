@@ -16,12 +16,24 @@ const (
 	tagIgnoreVal = "ignore"
 )
 
+var (
+	blackListWords = []string{
+		//grpc
+		"state",
+		"sizeCache",
+		"unknownFields",
+	}
+)
+
 // Start Maps all argument types including structs, slices and primitives. For sensetive info you can use trace:"ignore" tag to not include field in span
 func Start(ctx context.Context, name string, args ...any) (context.Context, Span) {
 	ctx, span := otel.Tracer("").Start(ctx, name)
 
 	for _, arg := range args {
 		value := reflect.ValueOf(arg)
+		if value.Kind() == reflect.Ptr { //check for ptr
+			value = value.Elem()
+		}
 		key := value.Type().Name()
 		setAttr(span, key, value)
 	}
@@ -42,7 +54,7 @@ func setAttr(span trace.Span, key string, val reflect.Value) {
 	case reflect.Struct:
 		for i := 0; i < val.NumField(); i++ {
 			field := val.Type().Field(i)
-			if field.Tag.Get(tagName) == tagIgnoreVal {
+			if field.Tag.Get(tagName) == tagIgnoreVal || checkBlackListWord(field.Name) {
 				continue
 			}
 			key := key + "." + field.Name
@@ -55,6 +67,11 @@ func setAttr(span trace.Span, key string, val reflect.Value) {
 			res = append(res, fmt.Sprintf("%v", val.Index(i).Interface()))
 		}
 		span.SetAttributes(attribute.String(key, strings.Join(res, ", ")))
+	case reflect.Ptr:
+		if !val.IsNil() {
+			v := val.Elem()
+			setAttr(span, key, v)
+		}
 	default:
 		span.SetAttributes(attribute.String(key, "unsupported type"))
 	}
@@ -92,4 +109,13 @@ func (s *Span) Error(err error) error {
 
 func (s *Span) SetName(name string) {
 	s.s.SetName(name)
+}
+
+func checkBlackListWord(word string) bool {
+	for _, w := range blackListWords {
+		if strings.Contains(word, w) {
+			return true
+		}
+	}
+	return false
 }
