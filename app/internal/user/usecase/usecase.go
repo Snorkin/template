@@ -2,24 +2,24 @@ package usecase
 
 import (
 	"context"
-	repo "example/internal/user/infra/repository"
+	repo "example/internal/user/infra/repository/model"
 	cnv "example/internal/user/usecase/converter"
+
 	"example/internal/user/usecase/model"
 	"example/pkg/tracing"
 )
 
-// Usecase main buiseness logic of application
-type Usecase interface {
-	CreateUser(ctx context.Context, req model.CreateUserReq) (model.User, error)
-	GetUserByLogin(ctx context.Context, req model.GetUserByLoginReq) (model.User, error)
+type repositrory interface {
+	CreateUser(ctx context.Context, req repo.CreateUserReq) (repo.CreateUserRes, error)
+	GetUserByLogin(ctx context.Context, req repo.GetUserByLoginReq) (repo.GetUserByLoginRes, error)
 }
 
 type UserUsecase struct {
-	repo repo.Repository
+	repo repositrory
 }
 
 func NewUserUsecase(
-	repo repo.Repository,
+	repo repositrory,
 ) *UserUsecase {
 	return &UserUsecase{
 		repo: repo,

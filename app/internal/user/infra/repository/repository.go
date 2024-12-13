@@ -7,11 +7,6 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-type Repository interface {
-	CreateUser(ctx context.Context, req model.CreateUserReq) (model.CreateUserRes, error)
-	GetUserByLogin(ctx context.Context, req model.GetUserByLoginReq) (model.GetUserByLoginRes, error)
-}
-
 type UserRepository struct {
 	db *sqlx.DB
 }

@@ -4,7 +4,7 @@ import (
 	"context"
 	cnv "example/internal/user/delivery/converter/http"
 	"example/internal/user/delivery/model"
-	user "example/internal/user/usecase"
+	uc "example/internal/user/usecase/model"
 	e "example/pkg/errors"
 	"example/pkg/errors/codes"
 	trace "example/pkg/tracing"
@@ -12,21 +12,21 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-// Handler all driver adapters (http/grpc calls, etc)
-type Handler interface {
-	GetUserByLogin() fiber.Handler
-	CreateUser() fiber.Handler
+// Usecase main buiseness logic of application
+type usecase interface {
+	CreateUser(ctx context.Context, req uc.CreateUserReq) (uc.User, error)
+	GetUserByLogin(ctx context.Context, req uc.GetUserByLoginReq) (uc.User, error)
 }
 
 type UserHttpHandler struct {
-	usecase user.Usecase
+	uc usecase
 }
 
 func NewUserHttpHandlers(
-	usecase user.Usecase,
+	uc usecase,
 ) *UserHttpHandler {
 	return &UserHttpHandler{
-		usecase: usecase,
+		uc: uc,
 	}
 }
 
@@ -45,7 +45,7 @@ func (h UserHttpHandler) GetUserByLogin() fiber.Handler {
 			return err //default errors placeholder
 		}
 
-		res, err := h.usecase.GetUserByLogin(ctx, cnv.GetUserByLoginReqDlvrToUc(req))
+		res, err := h.uc.GetUserByLogin(ctx, cnv.GetUserByLoginReqDlvrToUc(req))
 		if err != nil {
 			return err
 		}
@@ -69,7 +69,7 @@ func (h UserHttpHandler) CreateUser() fiber.Handler {
 			return err //default errors placeholder
 		}
 
-		res, err := h.usecase.CreateUser(ctx, cnv.CreateUserReqDlvrToUc(req))
+		res, err := h.uc.CreateUser(ctx, cnv.CreateUserReqDlvrToUc(req))
 		if err != nil {
 			return err
 		}

@@ -5,7 +5,13 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func MapUserRoutes(userRoutes fiber.Router, mdw middleware.MdwManager, h Handler) {
+// Handler all driver adapters (http/grpc calls, etc)
+type httpHandler interface {
+	GetUserByLogin() fiber.Handler
+	CreateUser() fiber.Handler
+}
+
+func MapUserRoutes(userRoutes fiber.Router, mdw middleware.MdwManager, h httpHandler) {
 	userRoutes.Get("/:login", mdw.Start(), h.GetUserByLogin())
 	userRoutes.Post("/", mdw.Start(), h.CreateUser())
 }

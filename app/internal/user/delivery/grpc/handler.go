@@ -3,21 +3,23 @@ package grpc
 import (
 	"context"
 	cnv "example/internal/user/delivery/converter/grpc"
-	userUC "example/internal/user/usecase"
+	uc "example/internal/user/usecase/model"
 	pb "example/pkg/proto"
 	"example/pkg/tracing"
 )
 
-type Handler interface {
-	pb.UserServiceServer
+// Usecase main buiseness logic of application
+type usecase interface {
+	CreateUser(ctx context.Context, req uc.CreateUserReq) (uc.User, error)
+	GetUserByLogin(ctx context.Context, req uc.GetUserByLoginReq) (uc.User, error)
 }
 
 type UserGrpcHandler struct {
-	usecase userUC.Usecase
+	usecase usecase
 	pb.UnimplementedUserServiceServer
 }
 
-func NewUserHandlers(usecase userUC.Usecase) *UserGrpcHandler {
+func NewUserHandlers(usecase usecase) *UserGrpcHandler {
 	return &UserGrpcHandler{usecase: usecase}
 }
 
