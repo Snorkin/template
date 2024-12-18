@@ -13,6 +13,8 @@ type Errs struct {
 	domain     string
 	time       time.Time
 	stacktrace *stacktrace
+	values     map[string]any
+	traceId    string
 }
 
 func (e *Errs) Msg() string {
@@ -48,6 +50,14 @@ func (e *Errs) ToMap() map[string]any {
 
 	if msg := e.Msg(); msg != "" {
 		payload["msg"] = msg
+	}
+
+	if traceId := e.traceId; traceId != "" {
+		payload["traceId"] = traceId
+	}
+
+	if values := e.values; values != nil && len(values) > 0 {
+		payload["values"] = values
 	}
 
 	if code := e.Code(); code != 0 {
@@ -107,21 +117,4 @@ func recursive(err *Errs, tap func(*Errs)) {
 	if child, ok := ToErrs(err.err); ok {
 		recursive(child, tap)
 	}
-}
-
-func coalesceOrEmpty[T comparable](v ...T) T {
-	result, _ := coalesce(v...)
-	return result
-}
-
-func coalesce[T comparable](values ...T) (result T, ok bool) {
-	for i := range values {
-		if values[i] != result {
-			result = values[i]
-			ok = true
-			return
-		}
-	}
-
-	return
 }

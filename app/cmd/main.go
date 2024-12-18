@@ -89,7 +89,7 @@ func initDeps() *dependencies {
 	// postgres
 	pgDB, err := postgres.InitPsqlDB()
 	if err != nil {
-		logger.Log.Fatalf("PostgreSQL init error: %s", err)
+		logger.Log.Fatalf("PostgreSQL init error", "error", err)
 	} else {
 		logger.Log.Infop("PostgreSQL connected", pgDB.Stats())
 	}

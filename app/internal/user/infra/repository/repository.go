@@ -25,7 +25,7 @@ func (u *UserRepository) GetUserByLogin(ctx context.Context, req model.GetUserBy
 	var res model.GetUserByLoginRes
 	err := u.db.GetContext(ctx, &res, queryGetUserById, req.Login)
 	if err != nil {
-		return res, errs.New(err).Msg("failed to get user by login").In("User").Trace(span).Wrap()
+		return res, errs.New().Msg("failed to get user by login").In("User").Values(req).WrapSpan(err, span)
 	}
 	return res, nil
 }
@@ -37,7 +37,7 @@ func (u *UserRepository) CreateUser(ctx context.Context, req model.CreateUserReq
 	var res model.CreateUserRes
 	err := u.db.GetContext(ctx, &res, queryCreateUser, req.Name, req.Email, req.Login)
 	if err != nil {
-		return res, span.Error(err)
+		return res, errs.New().Msg("failed to create user").In("User").Values(req).WrapSpan(err, span)
 	}
 	return res, nil
 }

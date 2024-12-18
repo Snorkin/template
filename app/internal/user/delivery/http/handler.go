@@ -6,6 +6,7 @@ import (
 	cnv "example/internal/user/delivery/converter/http"
 	"example/internal/user/delivery/model"
 	uc "example/internal/user/usecase/model"
+	errs "example/pkg/observer/errors"
 	"example/pkg/observer/tracing"
 	"example/pkg/validator"
 	"github.com/gofiber/fiber/v2"
@@ -57,7 +58,7 @@ func (h UserHttpHandler) CreateUser() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		ctx, ok := c.Locals("traceId").(context.Context)
 		if !ok {
-			return errors.New("no traceId")
+			return errs.New().Msg("traceId context not found").In("User").ToError()
 		}
 
 		ctx, span := trace.Start(ctx, "user.HttpHandler.CreateUser")
@@ -65,7 +66,7 @@ func (h UserHttpHandler) CreateUser() fiber.Handler {
 
 		var req model.CreateUserReq
 		if err := validator.ReadRequestBody(c, &req); err != nil {
-			return err //default errors placeholder
+			return errs.New().Msg("Failed to validate request body").Code(errs.InvalidArgument).WrapSpan(err, span)
 		}
 
 		res, err := h.uc.CreateUser(ctx, cnv.CreateUserReqDlvrToUc(req))
