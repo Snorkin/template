@@ -59,8 +59,8 @@ type GRPC struct {
 type Postgres struct {
 	Host     string `validate:"required"`
 	Port     string `validate:"required"`
-	User     string `validate:"required"`
-	Password string `validate:"required"`
+	User     string `validate:"required" observer:"ignore"`
+	Password string `validate:"required" observer:"ignore"`
 	DBName   string `validate:"required"`
 	SSLMode  string `validate:"required"`
 	PGDriver string `validate:"required"`
