@@ -58,7 +58,7 @@ func (st *stacktrace) String(deepestFrame string) string {
 
 			newline()
 
-			str += "  --- " + currentFrame
+			str += " --- " + currentFrame
 		}
 	}
 
