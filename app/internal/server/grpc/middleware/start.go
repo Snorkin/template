@@ -22,5 +22,5 @@ func Start(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, han
 		logger.Build.Err().Pairs("traceId", traceId, "info", e.ToMap()).Err(err)
 	}
 
-	return res, err
+	return res, e.ToGrpcError()
 }

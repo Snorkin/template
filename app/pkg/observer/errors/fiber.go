@@ -11,7 +11,7 @@ func (e *Errs) ToFiberError(c *fiber.Ctx) error {
 
 	if cfg.Environment == "dev" {
 		return c.Status(httpCode).JSON(fiber.Map{
-			"error": e.Error(),
+			"error": e.ToMap(),
 		})
 	}
 

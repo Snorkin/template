@@ -252,7 +252,6 @@ func setKeyValuesReflect(event *zerolog.Event, key string, val reflect.Value) *z
 		}
 
 		for i := 0; i < val.NumField(); i++ {
-
 			field := val.Type().Field(i)
 			if observer.CheckForIgnore(field.Name, field.Tag.Get(observer.TagName)) {
 				continue

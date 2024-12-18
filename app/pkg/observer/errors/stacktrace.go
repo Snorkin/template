@@ -8,7 +8,7 @@ import (
 
 const (
 	goModPkgPath = "/go/pkg/mod/"
-	skipFrames   = 3
+	skipFrames   = 2
 )
 
 var StackTraceMaxDepth int = 5

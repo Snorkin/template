@@ -2,7 +2,6 @@ package errs
 
 import (
 	"errors"
-	"fmt"
 	"strings"
 	"time"
 )
@@ -12,8 +11,8 @@ type Errs struct {
 	code       Code
 	msg        string
 	domain     string
-	time       time.Time   `observer:"ignore"`
-	stacktrace *stacktrace `observer:"ignore"`
+	time       time.Time
+	stacktrace *stacktrace
 }
 
 func (e *Errs) Msg() string {
@@ -25,9 +24,6 @@ func (e *Errs) Code() Code {
 }
 
 func (e *Errs) Error() string {
-	if e.msg != "" {
-		return e.msg
-	}
 	return e.err.Error()
 }
 
@@ -48,6 +44,10 @@ func (e *Errs) ToMap() map[string]any {
 
 	if err := e.Error(); err != "" {
 		payload["error"] = err
+	}
+
+	if msg := e.Msg(); msg != "" {
+		payload["msg"] = msg
 	}
 
 	if code := e.Code(); code != 0 {
@@ -75,15 +75,14 @@ func (e *Errs) Stacktrace() string {
 
 	recursive(e, func(er *Errs) {
 		if e.stacktrace != nil && len(e.stacktrace.frames) > 0 {
-			var err string
+			var _ string
 			if e.err != nil {
-				err = e.err.Error()
+				_ = e.err.Error()
 			} else {
-				err = ""
+				_ = ""
 			}
 
-			msg := coalesceOrEmpty(e.msg, err, "Error")
-			block := fmt.Sprintf("%s\n%s", msg, e.stacktrace.String(topFrame))
+			block := e.stacktrace.String(topFrame)
 
 			blocks = append([]string{block}, blocks...)
 
@@ -95,7 +94,7 @@ func (e *Errs) Stacktrace() string {
 		return ""
 	}
 
-	return "Error: " + strings.Join(blocks, "\nThrown: ")
+	return strings.Join(blocks, "\nThrown: ")
 }
 
 func recursive(err *Errs, tap func(*Errs)) {
