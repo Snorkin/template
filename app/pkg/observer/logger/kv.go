@@ -9,6 +9,7 @@ import (
 	"time"
 )
 
+// setKeyValuesAny adds key value pair to event using interface type checking
 func setKeyValuesAny(event *zerolog.Event, key string, value any) {
 	switch v := value.(type) {
 	case string:
@@ -24,7 +25,8 @@ func setKeyValuesAny(event *zerolog.Event, key string, value any) {
 	}
 }
 
-func setKeyValuesReflect(event *zerolog.Event, key string, val reflect.Value) *zerolog.Event {
+// setKeyValuesReflect adds key value pair to event using reflect type checking
+func setKeyValuesReflect(event *zerolog.Event, key string, val reflect.Value) {
 	switch val.Kind() {
 	case reflect.Int, reflect.Int64:
 		event = event.Int64(key, val.Int())
@@ -77,5 +79,4 @@ func setKeyValuesReflect(event *zerolog.Event, key string, val reflect.Value) *z
 		}
 		event = event.Interface(key, val)
 	}
-	return event
 }

@@ -7,6 +7,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+// ToGrpcError returns error state depending on app enironment
 func (e *Errs) ToGrpcError() error {
 	cfg := config.GetConfig()
 	grpcCode := e.code.ToGrpcCode()

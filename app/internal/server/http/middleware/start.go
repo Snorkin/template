@@ -35,11 +35,11 @@ func (m MdwManager) Start() fiber.Handler {
 		span.Set("status-code", c.Response().StatusCode())
 
 		if err := c.Next(); err != nil {
-			err, ok := errs.ToErrs(err)
+			e, ok := errs.AsErrs(err)
 			if ok {
-				logger.Build.Err().Pairs("info", err.ToMap()).Err(err)
+				logger.Build.Err().Pairs("info", e.ToMap()).Err(err)
 			}
-			return err.ToFiberError(c)
+			return e.ToFiberError(c)
 		}
 
 		return nil

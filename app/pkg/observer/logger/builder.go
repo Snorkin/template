@@ -58,7 +58,7 @@ func (b MsgBuilder) Msg(msg string, args ...any) {
 		if !value.IsValid() {
 			continue
 		}
-		if value.Kind() == reflect.Ptr { //check for ptr
+		if value.Kind() == reflect.Ptr {
 			value = value.Elem()
 		}
 		key := value.Type().Name()
@@ -68,7 +68,7 @@ func (b MsgBuilder) Msg(msg string, args ...any) {
 	b.event.Msg(msg)
 }
 
-// Msg logs message, creates key values of structs and primitive types
+// Msg logs message, creates key values of structs and primitive types using args
 func (b LvlBuilder) Msg(msg string, args ...any) {
 	for _, arg := range args {
 		value := reflect.ValueOf(arg)
@@ -85,7 +85,7 @@ func (b LvlBuilder) Msg(msg string, args ...any) {
 	b.event.Msg(msg)
 }
 
-// Msg logs message, creates key values of structs and primitive types
+// Send logs event without message
 func (b MsgBuilder) Send(args ...any) {
 	for _, arg := range args {
 		value := reflect.ValueOf(arg)
@@ -102,7 +102,7 @@ func (b MsgBuilder) Send(args ...any) {
 	b.event.Send()
 }
 
-// Msg logs message, creates key values of structs and primitive types
+// Send logs event without message
 func (b LvlBuilder) Send(args ...any) {
 	for _, arg := range args {
 		value := reflect.ValueOf(arg)

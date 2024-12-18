@@ -27,7 +27,7 @@ func Start(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, han
 		return res, nil
 	}
 
-	e, ok := errs.ToErrs(err)
+	e, ok := errs.AsErrs(err)
 	if ok {
 		logger.Build.Err().Pairs("info", e.ToMap()).Err(err)
 	}

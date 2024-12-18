@@ -9,7 +9,7 @@ import (
 	"reflect"
 )
 
-// Start Maps all argument types including structs, slices and primitives. For sensetive info you can use observer:"ignore" tag to not include field in span
+// Start Creating span. Maps all argument types including structs, slices and primitives. For sensetive info you can use observer:"ignore" tag to not include field in span
 // When primitive types passed in it adds span attribute with type of variable as a key and its value as value
 func Start(ctx context.Context, name string, args ...any) (context.Context, Span) {
 	ctx, span := otel.Tracer("").Start(ctx, name)
@@ -42,15 +42,18 @@ func (s *Span) End() {
 	s.s.End()
 }
 
+// Set sets new span attribute by key and value
 func (s *Span) Set(key string, val any) {
 	v := reflect.ValueOf(val)
 	setAttr(s.s, key, v)
 }
 
+// GetTraceId returns span traceId
 func (s *Span) GetTraceId() string {
 	return s.s.SpanContext().TraceID().String()
 }
 
+// Error sets error to span
 func (s *Span) Error(err error) error {
 	if err == nil {
 		return nil
@@ -60,6 +63,7 @@ func (s *Span) Error(err error) error {
 	return err
 }
 
+// SetName sets name for span
 func (s *Span) SetName(name string) {
 	s.s.SetName(name)
 }

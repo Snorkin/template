@@ -18,30 +18,32 @@ type Errs struct {
 	traceId    string
 }
 
+// Msg returns errors msg
 func (e *Errs) Msg() string {
 	return e.msg
 }
 
+// Code returns errors code
 func (e *Errs) Code() Code {
 	return e.code
 }
 
+// Error returns errors text. Implements error interface
 func (e *Errs) Error() string {
 	return e.err.Error()
 }
 
-func (e *Errs) AsErrs(err error) bool {
-	return errors.As(err, &e.err)
-}
-
-func ToErrs(err error) (*Errs, bool) {
+// AsErrs returns pointer to Errs and bool flag
+func AsErrs(err error) (*Errs, bool) {
 	var t *Errs
 	ok := errors.As(err, &t)
 	return t, ok
 }
 
+// Unwrap unwraps Errs returning inner error
 func (e *Errs) Unwrap() error { return e.err }
 
+// ToMap parses current error state to map[string]any
 func (e *Errs) ToMap() map[string]any {
 	payload := map[string]any{}
 
@@ -80,6 +82,7 @@ func (e *Errs) ToMap() map[string]any {
 	return payload
 }
 
+// Stacktrace returns string of errors stacktrace
 func (e *Errs) Stacktrace() string {
 	var blocks []string
 	topFrame := ""
@@ -108,6 +111,7 @@ func (e *Errs) Stacktrace() string {
 	return strings.Join(blocks, "\nThrown: ")
 }
 
+// recursive using callback iterates stacktrace
 func recursive(err *Errs, tap func(*Errs)) {
 	tap(err)
 
@@ -115,11 +119,12 @@ func recursive(err *Errs, tap func(*Errs)) {
 		return
 	}
 
-	if child, ok := ToErrs(err.err); ok {
+	if child, ok := AsErrs(err.err); ok {
 		recursive(child, tap)
 	}
 }
 
+// ToJson parses Errs to json format
 func (e *Errs) ToJson() ([]byte, error) {
 	return json.Marshal(e.ToMap())
 }

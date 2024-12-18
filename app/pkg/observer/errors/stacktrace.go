@@ -20,6 +20,7 @@ type stacktraceFrame struct {
 	line     int
 }
 
+// String returns text representation of frame
 func (frame *stacktraceFrame) String() string {
 	currentFrame := fmt.Sprintf("%v:%v", frame.file, frame.line)
 	if frame.function != "" {
@@ -33,10 +34,12 @@ type stacktrace struct {
 	frames []stacktraceFrame
 }
 
+// Error returns empty string
 func (st *stacktrace) Error() string {
 	return st.String("")
 }
 
+// String returns text reprentation of stacktrace
 func (st *stacktrace) String(deepestFrame string) string {
 	var str string
 
@@ -62,6 +65,7 @@ func (st *stacktrace) String(deepestFrame string) string {
 	return str
 }
 
+// newStacktrace creates Errs stacktrace
 func newStacktrace() *stacktrace {
 	var frames []stacktraceFrame
 
@@ -98,6 +102,7 @@ func newStacktrace() *stacktrace {
 	}
 }
 
+// shortFuncName shortens func names removes special symbols
 func shortFuncName(f *runtime.Func) string {
 	longName := f.Name()
 

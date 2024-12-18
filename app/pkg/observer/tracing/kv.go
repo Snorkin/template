@@ -10,6 +10,7 @@ import (
 	"time"
 )
 
+// setAttr sets attributes to span using reflect.Value
 func setAttr(span trace.Span, key string, val reflect.Value) {
 	switch val.Kind() {
 	case reflect.Int, reflect.Int64:

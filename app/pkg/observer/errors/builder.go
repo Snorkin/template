@@ -10,6 +10,7 @@ import (
 
 type ErrBuilder Errs
 
+// New inites ErrBuilder with default values
 func New() ErrBuilder {
 	return ErrBuilder{
 		err:        nil,
@@ -22,6 +23,7 @@ func New() ErrBuilder {
 	}
 }
 
+// toErrs returns pointer to Errs that implements error interface
 func (b ErrBuilder) toErrs() *Errs {
 	return &Errs{
 		err:        b.err,
@@ -49,7 +51,7 @@ func (b ErrBuilder) Wrap(err error) error {
 	return b.toErrs()
 }
 
-// Wrap wraps error adding stacktrace and other nice things.
+// WrapSpan wraps error adding stacktrace and other nice things. Sets error to span and traceId to error
 func (b ErrBuilder) WrapSpan(err error, span trace.Span) error {
 	if err == nil {
 		if b.msg == "" {
@@ -64,6 +66,9 @@ func (b ErrBuilder) WrapSpan(err error, span trace.Span) error {
 	return b.toErrs()
 }
 
+// ToError returns error interface from ErrBuilder,
+// when msg is empty generates default one,
+// if err is empty creates new error using msg
 func (b ErrBuilder) ToError() error {
 	if b.msg == "" {
 		b.err = errors.New("default error")
@@ -74,18 +79,19 @@ func (b ErrBuilder) ToError() error {
 	return b.toErrs()
 }
 
-// Code sets some arbitrary code on errob.
+// Code sets code on error.
 func (b ErrBuilder) Code(code Code) ErrBuilder {
 	b.code = code
 	return b
 }
 
-// In sets some arbitrary domain on errob.
+// In sets domain on error
 func (b ErrBuilder) In(domain string) ErrBuilder {
 	b.domain = domain
 	return b
 }
 
+// Msg sets errors msg
 func (b ErrBuilder) Msg(msg string, args ...any) ErrBuilder {
 	msg = fmt.Sprintf(msg, args...)
 	if b.err == nil {
@@ -95,7 +101,7 @@ func (b ErrBuilder) Msg(msg string, args ...any) ErrBuilder {
 	return b
 }
 
-// Code sets some arbitrary code on errob.
+// Values parses arguments to key(fieldName/primitiveType) value and saves it in error
 func (b ErrBuilder) Values(args ...any) ErrBuilder {
 	values := make(map[string]any)
 	for _, arg := range args {

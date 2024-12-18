@@ -8,6 +8,7 @@ import (
 	"time"
 )
 
+// setMapValue sets new entry of reflect.Value to map
 func setMapValue(values map[string]any, key string, val reflect.Value) {
 	switch val.Kind() {
 	case reflect.Int, reflect.Int64:
