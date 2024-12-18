@@ -10,7 +10,7 @@ type Code uint8
 const (
 	OK Code = iota
 	Canceled
-	//Unknown
+	Unknown
 	InvalidArgument
 	DeadlineExceeded
 	NotFound
@@ -63,6 +63,8 @@ func (c *Code) ToGrpcCode() grpcCodes.Code {
 		res = grpcCodes.DataLoss
 	case Unauthenticated:
 		res = grpcCodes.Unauthenticated
+	case Unknown:
+		res = grpcCodes.Unknown
 	default:
 		res = grpcCodes.Unknown
 	}

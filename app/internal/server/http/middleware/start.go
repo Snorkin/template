@@ -37,7 +37,7 @@ func (m MdwManager) Start() fiber.Handler {
 		if err := c.Next(); err != nil {
 			err, ok := errs.ToErrs(err)
 			if ok {
-				logger.Build.Err().Pairs("traceId", span.GetTraceId(), "info", err.ToMap()).Err(err)
+				logger.Build.Err().Pairs("info", err.ToMap()).Err(err)
 			}
 			return err.ToFiberError(c)
 		}
