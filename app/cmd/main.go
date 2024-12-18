@@ -65,6 +65,7 @@ type dependencies struct {
 
 func initDeps() *dependencies {
 	cfg := config.GetConfig()
+	logger.Log.Infop("Config", *cfg)
 
 	//tracing
 	tp, exp, err := trace.InitTracer(trace.Jaeger(cfg.Jaeger))
