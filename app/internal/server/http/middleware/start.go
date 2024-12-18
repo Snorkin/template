@@ -16,7 +16,6 @@ func (m MdwManager) Start() fiber.Handler {
 		ctx, span := trace.Start(c.Context(), "trace.FiberStart")
 		defer span.End()
 
-		// pass the span through userContext
 		span.SetName(c.Method() + " " + c.Path())
 
 		c.Locals("traceId", ctx)

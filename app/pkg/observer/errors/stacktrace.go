@@ -11,7 +11,7 @@ const (
 	skipFrames   = 2
 )
 
-var StackTraceMaxDepth int = 5
+const StackTraceMaxDepth int = 2 //skipframes + stacktracemaxdepth = stacktracemaxdepth
 
 type stacktraceFrame struct {
 	file     string
