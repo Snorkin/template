@@ -2,12 +2,11 @@ package http
 
 import (
 	"context"
+	"errors"
 	cnv "example/internal/user/delivery/converter/http"
 	"example/internal/user/delivery/model"
 	uc "example/internal/user/usecase/model"
-	e "example/pkg/errors"
-	"example/pkg/errors/codes"
-	trace "example/pkg/tracing"
+	"example/pkg/observer/tracing"
 	"example/pkg/validator"
 	"github.com/gofiber/fiber/v2"
 )
@@ -34,7 +33,7 @@ func (h UserHttpHandler) GetUserByLogin() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		ctx, ok := c.Locals("traceId").(context.Context)
 		if !ok {
-			return e.NewCustomError(codes.InvalidArgument, "No trace provided")
+			return errors.New("no traceId")
 		}
 
 		ctx, span := trace.Start(ctx, "user.HttpHandler.GetUserByLogin")
@@ -58,7 +57,7 @@ func (h UserHttpHandler) CreateUser() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		ctx, ok := c.Locals("traceId").(context.Context)
 		if !ok {
-			return e.NewCustomError(codes.InvalidArgument, "No trace provided")
+			return errors.New("no traceId")
 		}
 
 		ctx, span := trace.Start(ctx, "user.HttpHandler.CreateUser")

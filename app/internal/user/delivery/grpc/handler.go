@@ -4,8 +4,8 @@ import (
 	"context"
 	cnv "example/internal/user/delivery/converter/grpc"
 	uc "example/internal/user/usecase/model"
+	"example/pkg/observer/tracing"
 	pb "example/pkg/proto"
-	"example/pkg/tracing"
 )
 
 // Usecase main buiseness logic of application

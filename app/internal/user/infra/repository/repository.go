@@ -3,7 +3,8 @@ package repository
 import (
 	"context"
 	"example/internal/user/infra/repository/model"
-	trace "example/pkg/tracing"
+	errs "example/pkg/observer/errors"
+	"example/pkg/observer/tracing"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -24,7 +25,7 @@ func (u *UserRepository) GetUserByLogin(ctx context.Context, req model.GetUserBy
 	var res model.GetUserByLoginRes
 	err := u.db.GetContext(ctx, &res, queryGetUserById, req.Login)
 	if err != nil {
-		return res, span.Error(err)
+		return res, errs.New(err).Msg("failed to get user by login").In("User").Trace(span).Wrap()
 	}
 	return res, nil
 }

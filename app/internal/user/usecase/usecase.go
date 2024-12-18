@@ -4,9 +4,9 @@ import (
 	"context"
 	repo "example/internal/user/infra/repository/model"
 	cnv "example/internal/user/usecase/converter"
+	"example/pkg/observer/tracing"
 
 	"example/internal/user/usecase/model"
-	"example/pkg/tracing"
 )
 
 type repositrory interface {

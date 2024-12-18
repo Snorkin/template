@@ -2,7 +2,7 @@ package http
 
 import (
 	"example/config"
-	"example/pkg/logger"
+	"example/pkg/observer/logger"
 	sentryfiber "github.com/getsentry/sentry-go/fiber"
 	"github.com/gofiber/fiber/v2"
 	"github.com/jmoiron/sqlx"
@@ -35,7 +35,7 @@ func (s *Server) Run() error {
 	}
 
 	go func() {
-		logger.Log.Infof("HTTP server started on: %s:%s", cfg.Server.Http.Host, cfg.Server.Http.Port)
+		logger.Log.Infop("HTTP server started", cfg.Server.Http)
 		if err := s.http.Listen(cfg.Server.Http.Host + ":" + cfg.Server.Http.Port); err != nil {
 			logger.Log.Fatalf("Error starting HTTP server: %s", err)
 		}

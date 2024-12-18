@@ -5,16 +5,14 @@ import (
 	"example/config"
 	"example/internal/server/grpc"
 	"example/internal/server/http"
-	"example/pkg/logger"
+	"example/pkg/observer/logger"
+	trace "example/pkg/observer/tracing"
 	"example/pkg/storage/postgres"
 	"github.com/getsentry/sentry-go"
 	"github.com/jmoiron/sqlx"
-	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/jaeger"
-	"go.opentelemetry.io/otel/propagation"
-	"go.opentelemetry.io/otel/sdk/resource"
-	"go.opentelemetry.io/otel/sdk/trace"
-	semconv "go.opentelemetry.io/otel/semconv/v1.27.0"
+
+	otelTrace "go.opentelemetry.io/otel/sdk/trace"
 	stdLog "log"
 	"os"
 	"os/signal"
@@ -61,33 +59,18 @@ func main() {
 
 type dependencies struct {
 	pg  *sqlx.DB
-	tp  *trace.TracerProvider
+	tp  *otelTrace.TracerProvider
 	exp *jaeger.Exporter
 }
 
 func initDeps() *dependencies {
 	cfg := config.GetConfig()
-	//tracing
-	exporter, err := jaeger.New(
-		jaeger.WithCollectorEndpoint(
-			jaeger.WithEndpoint(cfg.Jaeger.URL),
-			jaeger.WithUsername(cfg.Jaeger.Username),
-			jaeger.WithPassword(cfg.Jaeger.Password),
-		),
-	)
-	if err != nil {
-		logger.Log.Fatalf("Cannot create Jaeger exporter: %s", err)
-	}
 
-	tp := trace.NewTracerProvider(
-		trace.WithBatcher(exporter),
-		trace.WithResource(resource.NewWithAttributes(
-			semconv.SchemaURL,
-			semconv.ServiceNameKey.String(cfg.Jaeger.ServiceName),
-		)),
-	)
-	otel.SetTracerProvider(tp)
-	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(propagation.TraceContext{}, propagation.Baggage{}))
+	//tracing
+	tp, exp, err := trace.InitTracer(trace.Jaeger(cfg.Jaeger))
+	if err != nil {
+		logger.Log.Fatalf("Failed to init tracer: %s", err)
+	}
 
 	//sentry
 	if cfg.Sentry.Enabled {
@@ -108,13 +91,13 @@ func initDeps() *dependencies {
 	if err != nil {
 		logger.Log.Fatalf("PostgreSQL init error: %s", err)
 	} else {
-		logger.Log.Infof("PostgreSQL connected")
+		logger.Log.Infop("PostgreSQL connected", pgDB.Stats())
 	}
 
 	return &dependencies{
 		pg:  pgDB,
 		tp:  tp,
-		exp: exporter,
+		exp: exp,
 	}
 }
 

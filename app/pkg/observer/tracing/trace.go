@@ -2,6 +2,7 @@ package trace
 
 import (
 	"context"
+	"example/pkg/observer"
 	"fmt"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
@@ -9,23 +10,11 @@ import (
 	"go.opentelemetry.io/otel/trace"
 	"reflect"
 	"strings"
+	"time"
 )
 
-const (
-	tagName      = "trace"
-	tagIgnoreVal = "ignore"
-)
-
-var (
-	blackListWords = []string{
-		//grpc
-		"state",
-		"sizeCache",
-		"unknownFields",
-	}
-)
-
-// Start Maps all argument types including structs, slices and primitives. For sensetive info you can use trace:"ignore" tag to not include field in span
+// Start Maps all argument types including structs, slices and primitives. For sensetive info you can use observer:"ignore" tag to not include field in span
+// When primitive types passed in it adds span attribute with type of variable as a key and its value as value
 func Start(ctx context.Context, name string, args ...any) (context.Context, Span) {
 	ctx, span := otel.Tracer("").Start(ctx, name)
 
@@ -41,6 +30,10 @@ func Start(ctx context.Context, name string, args ...any) (context.Context, Span
 	return ctx, NewSpan(span)
 }
 
+func GetTraceIdFromCtx(ctx context.Context) string {
+	return trace.SpanFromContext(ctx).SpanContext().TraceID().String()
+}
+
 func setAttr(span trace.Span, key string, val reflect.Value) {
 	switch val.Kind() {
 	case reflect.Int, reflect.Int64:
@@ -52,9 +45,17 @@ func setAttr(span trace.Span, key string, val reflect.Value) {
 	case reflect.Bool:
 		span.SetAttributes(attribute.Bool(key, val.Bool()))
 	case reflect.Struct:
+		//complex types handlers (CanInterface is musthave prevents panics)
+		if val.CanInterface() && val.Type() == reflect.TypeOf(time.Time{}) { // time.Time
+			v := reflect.ValueOf(val.Interface().(time.Time).UTC().String())
+			setAttr(span, key, v)
+			break
+		}
+
+		//struct fields iteration
 		for i := 0; i < val.NumField(); i++ {
 			field := val.Type().Field(i)
-			if field.Tag.Get(tagName) == tagIgnoreVal || checkBlackListWord(field.Name) {
+			if observer.CheckForIgnore(field.Name, field.Tag.Get(observer.TagName)) {
 				continue
 			}
 			key := key + "." + field.Name
@@ -64,6 +65,9 @@ func setAttr(span trace.Span, key string, val reflect.Value) {
 	case reflect.Slice:
 		var res []string
 		for i := 0; i < val.Len(); i++ {
+			if !val.Index(i).CanInterface() {
+				break
+			}
 			res = append(res, fmt.Sprintf("%v", val.Index(i).Interface()))
 		}
 		span.SetAttributes(attribute.String(key, strings.Join(res, ", ")))
@@ -109,13 +113,4 @@ func (s *Span) Error(err error) error {
 
 func (s *Span) SetName(name string) {
 	s.s.SetName(name)
-}
-
-func checkBlackListWord(word string) bool {
-	for _, w := range blackListWords {
-		if strings.Contains(word, w) {
-			return true
-		}
-	}
-	return false
 }

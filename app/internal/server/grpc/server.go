@@ -2,7 +2,8 @@ package grpc
 
 import (
 	"example/config"
-	"example/pkg/logger"
+	"example/internal/server/grpc/middleware"
+	"example/pkg/observer/logger"
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/recovery"
 	"github.com/jmoiron/sqlx"
 	"google.golang.org/grpc"
@@ -22,13 +23,13 @@ func NewServer(
 ) *Server {
 	return &Server{
 		grpc: grpc.NewServer(grpc.ChainUnaryInterceptor(
+			middleware.Start,
 			recovery.UnaryServerInterceptor([]recovery.Option{
 				recovery.WithRecoveryHandler(func(p interface{}) (err error) {
 					logger.Log.Errorf("Recovered from panic %v", p)
 					return status.Errorf(codes.Internal, "internal error")
 				})}...),
-		),
-		),
+		)),
 		db: db,
 	}
 }
@@ -49,7 +50,7 @@ func (s *Server) Run() error {
 	}
 
 	go func() {
-		logger.Log.Infof("GRPC Server started on: %s:%s", cfg.Server.Grpc.Host, cfg.Server.Grpc.Port)
+		logger.Log.Infop("GRPC Server started", cfg.Server.Grpc)
 		if err := s.grpc.Serve(l); err != nil {
 			logger.Log.Errorf("Error starting GRPC server: %s", err)
 		}

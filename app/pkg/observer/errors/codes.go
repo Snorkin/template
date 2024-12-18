@@ -1,16 +1,16 @@
-package codes
+package errs
 
 import (
 	grpcCodes "google.golang.org/grpc/codes"
 	"net/http"
 )
 
-type ErrorCode uint32
+type Code uint8
 
 const (
-	OK ErrorCode = iota
+	OK Code = iota
 	Canceled
-	Unknown
+	//Unknown
 	InvalidArgument
 	DeadlineExceeded
 	NotFound
@@ -27,7 +27,7 @@ const (
 	Unauthenticated
 )
 
-func (c *ErrorCode) ToGrpcCode() grpcCodes.Code {
+func (c *Code) ToGrpcCode() grpcCodes.Code {
 	var res grpcCodes.Code
 
 	switch *c {
@@ -70,7 +70,7 @@ func (c *ErrorCode) ToGrpcCode() grpcCodes.Code {
 	return res
 }
 
-func (c *ErrorCode) ToHttpCode() int {
+func (c *Code) ToHttpCode() int {
 	var res int
 
 	switch *c {
