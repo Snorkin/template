@@ -1,6 +1,7 @@
 package errs
 
 import (
+	"encoding/json"
 	"errors"
 	"strings"
 	"time"
@@ -117,4 +118,8 @@ func recursive(err *Errs, tap func(*Errs)) {
 	if child, ok := ToErrs(err.err); ok {
 		recursive(child, tap)
 	}
+}
+
+func (e *Errs) ToJson() ([]byte, error) {
+	return json.Marshal(e.ToMap())
 }
