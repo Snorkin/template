@@ -9,11 +9,15 @@ import (
 	"google.golang.org/grpc/metadata"
 )
 
+const (
+	traceIdHeader = "X-Trace-Id"
+)
+
 func Start(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 	ctx, span := trace.Start(ctx, info.FullMethod)
 	defer span.End()
 
-	err := grpc.SendHeader(ctx, metadata.Pairs("traceId", span.GetTraceId()))
+	err := grpc.SendHeader(ctx, metadata.Pairs(traceIdHeader, span.GetTraceId()))
 	if err != nil {
 		logger.Log.Info("failed to send trace id to header")
 	}
