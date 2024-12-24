@@ -17,8 +17,10 @@ func NewServer(
 	db *sqlx.DB,
 ) *Server {
 	return &Server{
-		http: fiber.New(fiber.Config{DisableStartupMessage: true}),
-		db:   db,
+		http: fiber.New(fiber.Config{
+			DisableStartupMessage: true,
+		}),
+		db: db,
 	}
 }
 
