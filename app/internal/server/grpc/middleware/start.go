@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"context"
+	"errors"
 	errs "example/pkg/observer/errors"
 	"example/pkg/observer/logger"
 	trace "example/pkg/observer/tracing"
@@ -28,9 +29,8 @@ func Start(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, han
 	}
 
 	e, ok := errs.AsErrs(err)
-	if ok {
-		logger.Build.Err().Pairs("info", e.ToMap()).Err(err)
+	if !ok {
+		errors.As(errs.New().Msg("non observer error").Log().Wrap(err), &e)
 	}
-
 	return res, e.ToGrpcError()
 }

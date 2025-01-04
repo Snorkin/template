@@ -1,8 +1,8 @@
 package middleware
 
 import (
+	"errors"
 	errs "example/pkg/observer/errors"
-	"example/pkg/observer/logger"
 	trace "example/pkg/observer/tracing"
 	"github.com/gofiber/fiber/v2"
 )
@@ -35,8 +35,8 @@ func (m MdwManager) Start() fiber.Handler {
 
 		if err := c.Next(); err != nil {
 			e, ok := errs.AsErrs(err)
-			if ok {
-				logger.Build.Err().Pairs("info", e.ToMap()).Err(err)
+			if !ok {
+				errors.As(errs.New().Msg("non observer error").Log().Wrap(err), &e)
 			}
 			return e.ToFiberError(c)
 		}

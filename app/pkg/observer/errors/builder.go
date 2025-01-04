@@ -58,33 +58,19 @@ func (b ErrBuilder) Wrap(err error) error {
 		}
 	}
 
-	if b.withLog {
-		logger.Build.Err().Args(b.ToMap()).Err(err)
-	}
+	b.err = err
+	b.stacktrace = newStacktrace()
 
 	if b.withSpan {
 		b.traceId = b.span.GetTraceId()
 	}
 
-	b.err = err
-	b.stacktrace = newStacktrace()
+	if b.withLog {
+		logger.Build.Err().Pairs("info", b.ToMap()).Err(err)
+	}
+
 	return b.toErrs()
 }
-
-//// WrapSpan wraps error adding stacktrace and other nice things. Sets error to span and traceId to error
-//func (b ErrBuilder) WrapSpan(err error, span trace.Span) error {
-//	if err == nil {
-//		if b.msg == "" {
-//			err = errors.New("default error")
-//		} else {
-//			err = errors.New(b.msg)
-//		}
-//	}
-//	b.err = span.Error(err)
-//	b.traceId = span.GetTraceId()
-//	b.stacktrace = newStacktrace()
-//	return b.toErrs()
-//}
 
 // ToError returns error interface from ErrBuilder,
 // when msg is empty generates default one,
