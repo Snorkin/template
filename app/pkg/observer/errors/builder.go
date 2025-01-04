@@ -2,24 +2,35 @@ package errs
 
 import (
 	"errors"
+	"example/pkg/observer/logger"
 	trace "example/pkg/observer/tracing"
 	"fmt"
 	"reflect"
 	"time"
 )
 
-type ErrBuilder Errs
+type ErrBuilder struct {
+	Errs
+	withLog  bool
+	withSpan bool
+	span     *trace.Span
+}
 
 // New inites ErrBuilder with default values
 func New() ErrBuilder {
 	return ErrBuilder{
-		err:        nil,
-		msg:        "",
-		code:       Internal,
-		time:       time.Now().UTC(),
-		domain:     "",
-		stacktrace: nil,
-		values:     make(map[string]any),
+		Errs{
+			err:        nil,
+			msg:        "",
+			code:       Internal,
+			time:       time.Now().UTC(),
+			domain:     "",
+			stacktrace: nil,
+			values:     make(map[string]any),
+		},
+		false,
+		false,
+		nil,
 	}
 }
 
@@ -46,25 +57,34 @@ func (b ErrBuilder) Wrap(err error) error {
 			err = errors.New(b.msg)
 		}
 	}
+
+	if b.withLog {
+		logger.Build.Err().Args(b.ToMap()).Err(err)
+	}
+
+	if b.withSpan {
+		b.traceId = b.span.GetTraceId()
+	}
+
 	b.err = err
 	b.stacktrace = newStacktrace()
 	return b.toErrs()
 }
 
-// WrapSpan wraps error adding stacktrace and other nice things. Sets error to span and traceId to error
-func (b ErrBuilder) WrapSpan(err error, span trace.Span) error {
-	if err == nil {
-		if b.msg == "" {
-			err = errors.New("default error")
-		} else {
-			err = errors.New(b.msg)
-		}
-	}
-	b.err = span.Error(err)
-	b.traceId = span.GetTraceId()
-	b.stacktrace = newStacktrace()
-	return b.toErrs()
-}
+//// WrapSpan wraps error adding stacktrace and other nice things. Sets error to span and traceId to error
+//func (b ErrBuilder) WrapSpan(err error, span trace.Span) error {
+//	if err == nil {
+//		if b.msg == "" {
+//			err = errors.New("default error")
+//		} else {
+//			err = errors.New(b.msg)
+//		}
+//	}
+//	b.err = span.Error(err)
+//	b.traceId = span.GetTraceId()
+//	b.stacktrace = newStacktrace()
+//	return b.toErrs()
+//}
 
 // ToError returns error interface from ErrBuilder,
 // when msg is empty generates default one,
@@ -116,5 +136,16 @@ func (b ErrBuilder) Values(args ...any) ErrBuilder {
 		setMapValue(values, key, value)
 	}
 	b.values = values
+	return b
+}
+
+func (b ErrBuilder) Log() ErrBuilder {
+	b.withLog = true
+	return b
+}
+
+func (b ErrBuilder) Span(span trace.Span) ErrBuilder {
+	b.withSpan = true
+	b.span = &span
 	return b
 }

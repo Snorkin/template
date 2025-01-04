@@ -66,7 +66,7 @@ func (h UserHttpHandler) CreateUser() fiber.Handler {
 
 		var req model.CreateUserReq
 		if err := validator.ReadRequestBody(c, &req); err != nil {
-			return errs.New().Msg("Failed to validate request body").Code(errs.InvalidArgument).WrapSpan(err, span)
+			return errs.New().Msg("Failed to validate request body").Code(errs.InvalidArgument).Span(span).Log().Wrap(err)
 		}
 
 		res, err := h.uc.CreateUser(ctx, cnv.CreateUserReqDlvrToUc(req))

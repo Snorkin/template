@@ -27,6 +27,9 @@ func setKeyValuesAny(event *zerolog.Event, key string, value any) {
 
 // setKeyValuesReflect adds key value pair to event using reflect type checking
 func setKeyValuesReflect(event *zerolog.Event, key string, val reflect.Value) {
+	if val.Kind() == reflect.Interface { //check for value if interface is passed
+		val = val.Elem()
+	}
 	switch val.Kind() {
 	case reflect.Int, reflect.Int64:
 		event = event.Int64(key, val.Int())
@@ -62,6 +65,13 @@ func setKeyValuesReflect(event *zerolog.Event, key string, val reflect.Value) {
 			res = append(res, fmt.Sprintf("%v", val.Index(i).Interface()))
 		}
 		event = event.Str(key, strings.Join(res, ","))
+	case reflect.Map:
+		iter := val.MapRange()
+		for iter.Next() {
+			key := iter.Key().String()
+			value := iter.Value()
+			setKeyValuesReflect(event, key, value)
+		}
 	case reflect.Ptr:
 		if !val.IsNil() {
 			v := val.Elem()
@@ -77,6 +87,6 @@ func setKeyValuesReflect(event *zerolog.Event, key string, val reflect.Value) {
 				break
 			}
 		}
-		event = event.Interface(key, val)
+		event = event.Interface(key, val.Interface())
 	}
 }

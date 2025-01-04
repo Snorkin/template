@@ -12,6 +12,9 @@ import (
 
 // setAttr sets attributes to span using reflect.Value
 func setAttr(span trace.Span, key string, val reflect.Value) {
+	if val.Kind() == reflect.Interface { //check for value if interface is passed
+		val = val.Elem()
+	}
 	switch val.Kind() {
 	case reflect.Int, reflect.Int64:
 		span.SetAttributes(attribute.Int64(key, val.Int()))
@@ -48,6 +51,13 @@ func setAttr(span trace.Span, key string, val reflect.Value) {
 			res = append(res, fmt.Sprintf("%v", val.Index(i).Interface()))
 		}
 		span.SetAttributes(attribute.String(key, strings.Join(res, ", ")))
+	case reflect.Map:
+		iter := val.MapRange()
+		for iter.Next() {
+			key := iter.Key().String()
+			value := iter.Value()
+			setAttr(span, key, value)
+		}
 	case reflect.Ptr:
 		if !val.IsNil() {
 			v := val.Elem()
