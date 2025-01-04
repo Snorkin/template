@@ -67,8 +67,11 @@ func setKeyValuesReflect(event *zerolog.Event, key string, val reflect.Value) {
 		event = event.Str(key, strings.Join(res, ","))
 	case reflect.Map:
 		iter := val.MapRange()
+		if key != "" {
+			key += "."
+		}
 		for iter.Next() {
-			key := iter.Key().String()
+			key := key + iter.Key().String()
 			value := iter.Value()
 			setKeyValuesReflect(event, key, value)
 		}

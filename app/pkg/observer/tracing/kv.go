@@ -53,6 +53,9 @@ func setAttr(span trace.Span, key string, val reflect.Value) {
 		span.SetAttributes(attribute.String(key, strings.Join(res, ", ")))
 	case reflect.Map:
 		iter := val.MapRange()
+		if key != "" {
+			key += "."
+		}
 		for iter.Next() {
 			key := iter.Key().String()
 			value := iter.Value()
