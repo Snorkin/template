@@ -24,13 +24,13 @@ func Start(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, han
 	}
 
 	res, err := handler(ctx, req)
-	if err == nil {
-		return res, nil
+	if err != nil {
+		e, ok := errs.AsErrs(err)
+		if !ok {
+			errors.As(errs.New().Msg("unwrapped error").Log().Span(span).Wrap(err), &e)
+		}
+		return res, e.ToGrpcError()
 	}
 
-	e, ok := errs.AsErrs(err)
-	if !ok {
-		errors.As(errs.New().Msg("non observer error").Log().Wrap(err), &e)
-	}
-	return res, e.ToGrpcError()
+	return res, nil
 }
