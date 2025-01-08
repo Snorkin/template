@@ -66,6 +66,8 @@ func setAttr(span trace.Span, key string, val reflect.Value) {
 			v := val.Elem()
 			setAttr(span, key, v)
 		}
+	case reflect.Uint8:
+		span.SetAttributes(attribute.Int(key, int(val.Interface().(uint8))))
 	default:
 		span.SetAttributes(attribute.String(key, "unsupported type"))
 	}

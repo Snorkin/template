@@ -114,3 +114,7 @@ func (c *Code) ToHttpCode() int {
 
 	return res
 }
+
+func (c *Code) Int() int {
+	return int(*c)
+}

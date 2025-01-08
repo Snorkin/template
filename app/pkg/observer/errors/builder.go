@@ -63,6 +63,10 @@ func (b ErrBuilder) Wrap(err error) error {
 
 	if b.withSpan {
 		b.traceId = b.span.GetTraceId()
+		_ = b.span.Error(b.err)
+		if b.msg != "" {
+			b.span.Args(b.Errs.ToMap())
+		}
 	}
 
 	if b.withLog {

@@ -67,3 +67,16 @@ func (s *Span) Error(err error) error {
 func (s *Span) SetName(name string) {
 	s.s.SetName(name)
 }
+
+// Args Maps all argument types including structs, slices and primitives and adds it to existing span. For sensetive info you can use observer:"ignore" tag to not include field in span
+// When primitive types passed in it adds span attribute with type of variable as a key and its value as value
+func (s *Span) Args(args ...any) {
+	for _, arg := range args {
+		value := reflect.ValueOf(arg)
+		if value.Kind() == reflect.Ptr { //check for ptr
+			value = value.Elem()
+		}
+		key := value.Type().Name()
+		setAttr(s.s, key, value)
+	}
+}

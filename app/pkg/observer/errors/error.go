@@ -64,7 +64,7 @@ func (e *Errs) ToMap() map[string]any {
 	}
 
 	if code := e.Code(); code != 0 {
-		payload["code"] = code
+		payload["code"] = code.Int()
 	}
 
 	if t := e.time; t != (time.Time{}) {
