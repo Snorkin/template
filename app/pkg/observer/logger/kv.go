@@ -75,11 +75,9 @@ func setKeyValuesReflect(event *zerolog.Event, key string, val reflect.Value) {
 		for iter.Next() {
 			key := key + iter.Key().String()
 			value := iter.Value()
-			if observer.CheckForIgnore(key, "values") { // ignore for recursive key value call (used for logging errs.values)
-				setKeyValuesAny(event, key, value.Interface())
-				continue
+			if val.CanInterface() {
+				event.Interface(key, value.Interface())
 			}
-			setKeyValuesReflect(event, key, value)
 		}
 	case reflect.Ptr:
 		if !val.IsNil() {
