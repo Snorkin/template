@@ -90,7 +90,7 @@ func (a *appLogger) Infop(msg string, keyValue ...interface{}) {
 	event.Msgf(msg)
 }
 
-// Infoa parses arguments to key value pairs where key is a name of structure field / primitive type and value as value
+// Infoa parses arguments to key value pairs where key is a structure field name / primitive type and value as value
 func (a *appLogger) Infoa(msg string, args ...interface{}) {
 	event := a.logger.Info()
 
@@ -202,6 +202,11 @@ func (a *appLogger) Panicp(msg string, keyValue ...interface{}) {
 		setKeyValuesAny(event, key, value)
 	}
 	event.Msgf(msg)
+}
+
+// Fatalf logs error using template and args
+func (a *appLogger) Fatalf(format string, args ...interface{}) {
+	a.logger.Fatal().Msgf(format, args...)
 }
 
 // Fatalp panics with log and pairs of key value

@@ -5,7 +5,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-// ToFiberError returns errors state depending on app environment
+// ToFiberError returns error, response depends on app environment
 func (e *Errs) ToFiberError(c *fiber.Ctx) error {
 	cfg := config.GetConfig()
 	httpCode := e.code.ToHttpCode()
@@ -16,5 +16,5 @@ func (e *Errs) ToFiberError(c *fiber.Ctx) error {
 		})
 	}
 
-	return c.SendStatus(httpCode)
+	return c.Status(httpCode).JSON(fiber.Map{"msg": e.msg})
 }
