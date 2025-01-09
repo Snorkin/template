@@ -16,7 +16,7 @@ type ErrBuilder struct {
 	span     *trace.Span
 }
 
-// New inites ErrBuilder with default values
+// New inits ErrBuilder with default values
 func New() ErrBuilder {
 	return ErrBuilder{
 		Errs{
