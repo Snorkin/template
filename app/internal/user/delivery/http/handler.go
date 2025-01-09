@@ -30,14 +30,14 @@ func NewUserHttpHandlers(
 	}
 }
 
-func (h UserHttpHandler) GetUserByLogin() fiber.Handler {
+func (h *UserHttpHandler) GetUserByLogin() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		ctx, ok := c.Locals("traceId").(context.Context)
 		if !ok {
 			return errors.New("no traceId")
 		}
 
-		ctx, span := trace.StartName(ctx, "http.UserHttpHandler.GetUserByLogin")
+		ctx, span := trace.Start(ctx)
 		defer span.End()
 
 		var req model.GetUserByLoginReq
@@ -54,7 +54,7 @@ func (h UserHttpHandler) GetUserByLogin() fiber.Handler {
 	}
 }
 
-func (h UserHttpHandler) CreateUser() fiber.Handler {
+func (h *UserHttpHandler) CreateUser() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		ctx, ok := c.Locals("traceId").(context.Context)
 		if !ok {

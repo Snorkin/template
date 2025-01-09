@@ -9,24 +9,24 @@ import (
 	"example/internal/user/usecase/model"
 )
 
-type repositrory interface {
+type repository interface {
 	CreateUser(ctx context.Context, req repo.CreateUserReq) (repo.CreateUserRes, error)
 	GetUserByLogin(ctx context.Context, req repo.GetUserByLoginReq) (repo.GetUserByLoginRes, error)
 }
 
 type UserUsecase struct {
-	repo repositrory
+	repo repository
 }
 
 func NewUserUsecase(
-	repo repositrory,
+	repo repository,
 ) *UserUsecase {
 	return &UserUsecase{
 		repo: repo,
 	}
 }
 
-func (u UserUsecase) GetUserByLogin(ctx context.Context, req model.GetUserByLoginReq) (model.User, error) {
+func (u *UserUsecase) GetUserByLogin(ctx context.Context, req model.GetUserByLoginReq) (model.User, error) {
 	ctx, span := trace.Start(ctx, req)
 	defer span.End()
 
@@ -38,7 +38,7 @@ func (u UserUsecase) GetUserByLogin(ctx context.Context, req model.GetUserByLogi
 	return cnv.GetUserByLoginResRepoToUc(res), nil
 }
 
-func (u UserUsecase) CreateUser(ctx context.Context, req model.CreateUserReq) (model.User, error) {
+func (u *UserUsecase) CreateUser(ctx context.Context, req model.CreateUserReq) (model.User, error) {
 	ctx, span := trace.Start(ctx, req)
 	defer span.End()
 

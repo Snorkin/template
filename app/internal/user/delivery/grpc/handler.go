@@ -23,7 +23,7 @@ func NewUserHandlers(usecase usecase) *UserGrpcHandler {
 	return &UserGrpcHandler{usecase: usecase}
 }
 
-func (h UserGrpcHandler) GetUserByLogin(ctx context.Context, req *pb.GetUserByLoginRequest) (*pb.GetUserByLoginResponse, error) {
+func (h *UserGrpcHandler) GetUserByLogin(ctx context.Context, req *pb.GetUserByLoginRequest) (*pb.GetUserByLoginResponse, error) {
 	ctx, span := trace.Start(ctx, req)
 	defer span.End()
 
@@ -35,7 +35,7 @@ func (h UserGrpcHandler) GetUserByLogin(ctx context.Context, req *pb.GetUserByLo
 	return cnv.GetUserByLoginResUcToDlvr(res), nil
 }
 
-func (h UserGrpcHandler) CreateUser(ctx context.Context, req *pb.CreateUserRequest) (*pb.CreateUserResponse, error) {
+func (h *UserGrpcHandler) CreateUser(ctx context.Context, req *pb.CreateUserRequest) (*pb.CreateUserResponse, error) {
 	ctx, span := trace.Start(ctx, req)
 	defer span.End()
 
