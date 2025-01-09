@@ -70,7 +70,7 @@ func (b ErrBuilder) Wrap(err error) error {
 	}
 
 	if b.withLog {
-		logger.Build.Err().Pairs("info", b.ToMap()).Err(err)
+		logger.Build.Err().Args(b.ToMap()).Err(err)
 	}
 
 	return b.toErrs()
