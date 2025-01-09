@@ -16,7 +16,7 @@ func (e *Errs) ToGrpcError() error {
 	if cfg.Environment == "dev" {
 		info, err := e.ToJson()
 		if err != nil {
-			logger.Log.Errorf("failed to marshal error to json", "error", err)
+			logger.Log.Errorp("failed to marshal error to json", "error", err)
 			res = e.err.Error()
 		}
 		res = string(info)

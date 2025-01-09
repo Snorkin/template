@@ -45,11 +45,8 @@ func initLogger() *zerolog.Logger {
 	return &logger
 }
 
-func (a *appLogger) Debug(msg string) {
-	a.logger.Debug().Msg(msg)
-}
-
-func (a *appLogger) Debugf(msg string, keyValue ...interface{}) {
+// Debugp logs warning with pairs of key value
+func (a *appLogger) Debugp(msg string, keyValue ...interface{}) {
 	if len(keyValue)%2 != 0 {
 		a.logger.Error().Msg("Invalid number of arguments. Key-value pairs must be even.")
 		return
@@ -71,11 +68,8 @@ func (a *appLogger) Debugf(msg string, keyValue ...interface{}) {
 
 }
 
-func (a *appLogger) Info(msg string) {
-	a.logger.Info().Msg(msg)
-}
-
-func (a *appLogger) Infof(msg string, keyValue ...interface{}) {
+// Infop logs info with pairs of key value
+func (a *appLogger) Infop(msg string, keyValue ...interface{}) {
 	if len(keyValue)%2 != 0 {
 		a.logger.Error().Msg("Invalid number of arguments. Key-value pairs must be even.")
 		return
@@ -96,7 +90,8 @@ func (a *appLogger) Infof(msg string, keyValue ...interface{}) {
 	event.Msgf(msg)
 }
 
-func (a *appLogger) Infop(msg string, args ...interface{}) {
+// Infoa parses arguments to key value pairs where key is a name of structure field / primitive type and value as value
+func (a *appLogger) Infoa(msg string, args ...interface{}) {
 	event := a.logger.Info()
 
 	for _, arg := range args {
@@ -114,11 +109,8 @@ func (a *appLogger) Infop(msg string, args ...interface{}) {
 	event.Msg(msg)
 }
 
-func (a *appLogger) Warn(msg string) {
-	a.logger.Warn().Msg(msg)
-}
-
-func (a *appLogger) Warnf(msg string, keyValue ...interface{}) {
+// Warnp logs warning with pairs of key value
+func (a *appLogger) Warnp(msg string, keyValue ...interface{}) {
 	if len(keyValue)%2 != 0 {
 		a.logger.Error().Msg("Invalid number of arguments. Key-value pairs must be even.")
 		return
@@ -139,11 +131,18 @@ func (a *appLogger) Warnf(msg string, keyValue ...interface{}) {
 	event.Msgf(msg)
 }
 
+// Error logs error
 func (a *appLogger) Error(err error) {
 	a.logger.Error().Msg(err.Error())
 }
 
-func (a *appLogger) Errorf(msg string, keyValue ...interface{}) {
+// Errorf logs error using template and args
+func (a *appLogger) Errorf(format string, args ...interface{}) {
+	a.logger.Error().Msgf(format, args...)
+}
+
+// Errorp logs errors with pairs of key value
+func (a *appLogger) Errorp(msg string, keyValue ...interface{}) {
 	if len(keyValue)%2 != 0 {
 		a.logger.Error().Msg("Invalid number of arguments. Key-value pairs must be even.")
 		return
@@ -164,7 +163,8 @@ func (a *appLogger) Errorf(msg string, keyValue ...interface{}) {
 	event.Msgf(msg)
 }
 
-func (a *appLogger) Errorp(msg string, args ...interface{}) {
+// Errora parses arguments to key value pairs where key is a name of structure field / primitive type and value as value
+func (a *appLogger) Errora(msg string, args ...interface{}) {
 	event := a.logger.Error()
 
 	for _, arg := range args {
@@ -182,11 +182,8 @@ func (a *appLogger) Errorp(msg string, args ...interface{}) {
 	event.Msg(msg)
 }
 
-func (a *appLogger) Panic(msg string) {
-	a.logger.Panic().Msg(msg)
-}
-
-func (a *appLogger) Panicf(msg string, keyValue ...interface{}) {
+// Panicp panics with log and pairs of key value
+func (a *appLogger) Panicp(msg string, keyValue ...interface{}) {
 	if len(keyValue)%2 != 0 {
 		a.logger.Error().Msg("Invalid number of arguments. Key-value pairs must be even.")
 		return
@@ -207,11 +204,8 @@ func (a *appLogger) Panicf(msg string, keyValue ...interface{}) {
 	event.Msgf(msg)
 }
 
-func (a *appLogger) Fatal(msg string) {
-	a.logger.Fatal().Msg(msg)
-}
-
-func (a *appLogger) Fatalf(msg string, keyValue ...interface{}) {
+// Fatalp panics with log and pairs of key value
+func (a *appLogger) Fatalp(msg string, keyValue ...interface{}) {
 	if len(keyValue)%2 != 0 {
 		a.logger.Error().Msg("Invalid number of arguments. Key-value pairs must be even.")
 		return

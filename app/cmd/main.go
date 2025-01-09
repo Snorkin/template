@@ -38,7 +38,7 @@ func main() {
 	httpSrv := http.NewServer(deps.pg)
 	err := httpSrv.Run()
 	if err != nil {
-		logger.Log.Fatalf("Failed to start HTTP server: %s", err)
+		logger.Log.Fatalp("Failed to start HTTP server: %s", err)
 	}
 	defer httpSrv.Shutdown()
 
@@ -46,7 +46,7 @@ func main() {
 	grpcSrv := grpc.NewServer(deps.pg)
 	err = grpcSrv.Run()
 	if err != nil {
-		logger.Log.Fatalf("Failed to start GRPC server: %s", err)
+		logger.Log.Fatalp("Failed to start GRPC server: %s", err)
 	}
 	defer grpcSrv.Shutdown()
 
@@ -54,7 +54,7 @@ func main() {
 	signal.Notify(exitCh, os.Interrupt, syscall.SIGTERM)
 	<-exitCh
 
-	logger.Log.Info("App is gracefully stopped")
+	logger.Log.Infop("App is gracefully stopped")
 }
 
 type dependencies struct {
@@ -65,12 +65,12 @@ type dependencies struct {
 
 func initDeps() *dependencies {
 	cfg := config.GetConfig()
-	logger.Log.Infop("Config", *cfg)
+	logger.Log.Infoa("Config", cfg)
 
 	//tracing
 	tp, exp, err := trace.InitTracer(trace.Jaeger(cfg.Jaeger))
 	if err != nil {
-		logger.Log.Fatalf("Failed to init tracer: %s", err)
+		logger.Log.Fatalp("Failed to init tracer: %s", err)
 	}
 
 	//sentry
@@ -80,9 +80,9 @@ func initDeps() *dependencies {
 			TracesSampleRate: 0.15,
 		})
 		if err != nil {
-			logger.Log.Fatalf("Sentry init error: %s", err)
+			logger.Log.Fatalp("Sentry init error: %s", err)
 		} else {
-			logger.Log.Info("Sentry connected")
+			logger.Log.Infop("Sentry connected")
 		}
 		defer sentry.Flush(time.Second * 5)
 	}
@@ -90,9 +90,9 @@ func initDeps() *dependencies {
 	// postgres
 	pgDB, err := postgres.InitPsqlDB()
 	if err != nil {
-		logger.Log.Fatalf("PostgreSQL init error", "error", err)
+		logger.Log.Fatalp("PostgreSQL init error", "error", err)
 	} else {
-		logger.Log.Infop("PostgreSQL connected")
+		logger.Log.Infoa("PostgreSQL connected", pgDB.Stats())
 	}
 
 	return &dependencies{
@@ -108,7 +108,7 @@ func (d *dependencies) close() {
 		if err != nil {
 			logger.Log.Error(err)
 		} else {
-			logger.Log.Info("PostgreSQL connection resolved")
+			logger.Log.Infop("PostgreSQL connection resolved")
 		}
 	}
 	if d.tp != nil {
@@ -116,7 +116,7 @@ func (d *dependencies) close() {
 		if err != nil {
 			logger.Log.Error(err)
 		} else {
-			logger.Log.Info("Trace provider resolved")
+			logger.Log.Infop("Trace provider resolved")
 		}
 	}
 	if d.exp != nil {
@@ -124,8 +124,8 @@ func (d *dependencies) close() {
 		if err != nil {
 			logger.Log.Error(err)
 		} else {
-			logger.Log.Info("Exporter resolved")
+			logger.Log.Infop("Exporter resolved")
 		}
 	}
-	logger.Log.Info("All dependencies resolved")
+	logger.Log.Infop("All dependencies resolved")
 }

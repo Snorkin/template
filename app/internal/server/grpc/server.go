@@ -26,7 +26,7 @@ func NewServer(
 			middleware.Start,
 			recovery.UnaryServerInterceptor([]recovery.Option{
 				recovery.WithRecoveryHandler(func(p interface{}) (err error) {
-					logger.Log.Errorf("Recovered from panic %v", p)
+					logger.Log.Errorp("Recovered from panic", "error", p)
 					return status.Errorf(codes.Internal, "internal error")
 				})}...),
 		)),
@@ -50,7 +50,7 @@ func (s *Server) Run() error {
 	}
 
 	go func() {
-		logger.Log.Infop("GRPC Server started", cfg.Server.Grpc)
+		logger.Log.Infoa("GRPC Server started", cfg.Server.Grpc)
 		if err := s.grpc.Serve(l); err != nil {
 			logger.Log.Errorf("Error starting GRPC server: %s", err)
 		}
@@ -61,5 +61,5 @@ func (s *Server) Run() error {
 
 func (s *Server) Shutdown() {
 	s.grpc.GracefulStop()
-	logger.Log.Info("GRPC server resolved")
+	logger.Log.Infop("GRPC server resolved")
 }

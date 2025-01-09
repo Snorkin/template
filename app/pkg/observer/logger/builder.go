@@ -32,7 +32,7 @@ func (b LogBuilder) Info() MsgBuilder {
 // Pairs prepares passed key value pairs and passes it forward
 func (b MsgBuilder) Pairs(keyValue ...any) MsgBuilder {
 	if len(keyValue)%2 != 0 {
-		Log.Errorf("Invalid number of arguments. Key-value pairs must be even.")
+		Log.Errorf("Invalid number of arguments %d. Key-value pairs must be even.", len(keyValue))
 		return b
 	}
 

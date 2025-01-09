@@ -20,6 +20,8 @@ func setKeyValuesAny(event *zerolog.Event, key string, value any) {
 		event = event.Bool(key, v)
 	case float64:
 		event = event.Float64(key, v)
+	case error:
+		event = event.Interface(key, v.Error())
 	default:
 		event = event.Interface(key, v)
 	}

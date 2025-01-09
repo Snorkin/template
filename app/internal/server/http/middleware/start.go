@@ -13,7 +13,7 @@ const (
 
 func (m MdwManager) Start() fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		ctx, span := trace.Start(c.Context(), "trace.FiberStart")
+		ctx, span := trace.StartName(c.Context(), "trace.FiberStart")
 		defer span.End()
 
 		span.SetName(c.Method() + " " + c.Path())

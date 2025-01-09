@@ -37,7 +37,7 @@ func (h UserHttpHandler) GetUserByLogin() fiber.Handler {
 			return errors.New("no traceId")
 		}
 
-		ctx, span := trace.Start(ctx, "user.HttpHandler.GetUserByLogin")
+		ctx, span := trace.StartName(ctx, "http.UserHttpHandler.GetUserByLogin")
 		defer span.End()
 
 		var req model.GetUserByLoginReq
@@ -61,7 +61,7 @@ func (h UserHttpHandler) CreateUser() fiber.Handler {
 			return errs.New().Msg("traceId context not found").In("User").ToError()
 		}
 
-		ctx, span := trace.Start(ctx, "user.HttpHandler.CreateUser")
+		ctx, span := trace.Start(ctx)
 		defer span.End()
 
 		var req model.CreateUserReq

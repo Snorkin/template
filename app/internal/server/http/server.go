@@ -33,13 +33,13 @@ func (s *Server) Run() error {
 	}))
 
 	if err := s.MapHandlers(); err != nil {
-		logger.Log.Fatalf("Cannot map handlers: %s", err)
+		logger.Log.Fatalp("Cannot map handlers: %s", err)
 	}
 
 	go func() {
-		logger.Log.Infop("HTTP server started", cfg.Server.Http)
+		logger.Log.Infoa("HTTP server started", cfg.Server.Http)
 		if err := s.http.Listen(cfg.Server.Http.Host + ":" + cfg.Server.Http.Port); err != nil {
-			logger.Log.Fatalf("Error starting HTTP server: %s", err)
+			logger.Log.Fatalp("Error starting HTTP server: %s", err)
 		}
 	}()
 
@@ -49,8 +49,8 @@ func (s *Server) Run() error {
 func (s *Server) Shutdown() {
 	err := s.http.Shutdown()
 	if err != nil {
-		logger.Log.Error(err)
+		logger.Log.Errorp("failed to shutdown HTTP server", "err", err)
 	} else {
-		logger.Log.Info("HTTP server resolved")
+		logger.Log.Infop("HTTP server resolved")
 	}
 }

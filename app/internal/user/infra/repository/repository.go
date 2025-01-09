@@ -19,7 +19,7 @@ func NewUserRepository(db *sqlx.DB) *UserRepository {
 }
 
 func (u *UserRepository) GetUserByLogin(ctx context.Context, req model.GetUserByLoginReq) (model.GetUserByLoginRes, error) {
-	ctx, span := trace.Start(ctx, "user.Repository.GetUserByLogin", req)
+	ctx, span := trace.Start(ctx, req)
 	defer span.End()
 
 	var res model.GetUserByLoginRes
@@ -31,7 +31,7 @@ func (u *UserRepository) GetUserByLogin(ctx context.Context, req model.GetUserBy
 }
 
 func (u *UserRepository) CreateUser(ctx context.Context, req model.CreateUserReq) (model.CreateUserRes, error) {
-	ctx, span := trace.Start(ctx, "user.Repository.CreateUser", req)
+	ctx, span := trace.Start(ctx, req)
 	defer span.End()
 
 	var res model.CreateUserRes

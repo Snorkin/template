@@ -129,11 +129,13 @@ func (b ErrBuilder) Values(args ...any) ErrBuilder {
 	return b
 }
 
+// Log logs error using info as key and toMap() method as value
 func (b ErrBuilder) Log() ErrBuilder {
 	b.withLog = true
 	return b
 }
 
+// Span adds span to builder
 func (b ErrBuilder) Span(span trace.Span) ErrBuilder {
 	b.withSpan = true
 	b.span = &span

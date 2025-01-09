@@ -27,7 +27,7 @@ func NewUserUsecase(
 }
 
 func (u UserUsecase) GetUserByLogin(ctx context.Context, req model.GetUserByLoginReq) (model.User, error) {
-	ctx, span := trace.Start(ctx, "user.Usecase.GetUserByLogin", req)
+	ctx, span := trace.Start(ctx, req)
 	defer span.End()
 
 	res, err := u.repo.GetUserByLogin(ctx, cnv.GetUserByLoginReqUcToRepo(req))
@@ -39,7 +39,7 @@ func (u UserUsecase) GetUserByLogin(ctx context.Context, req model.GetUserByLogi
 }
 
 func (u UserUsecase) CreateUser(ctx context.Context, req model.CreateUserReq) (model.User, error) {
-	ctx, span := trace.Start(ctx, "user.Usecase.CreateUser", req)
+	ctx, span := trace.Start(ctx, req)
 	defer span.End()
 
 	res, err := u.repo.CreateUser(ctx, cnv.CreateUserReqUcToRepo(req))
