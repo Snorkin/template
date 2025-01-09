@@ -1,9 +1,7 @@
 package logger
 
 import (
-	"example/config"
 	"github.com/rs/zerolog"
-	"os"
 	"reflect"
 )
 
@@ -22,27 +20,6 @@ var Log *appLogger
 
 type appLogger struct {
 	logger *zerolog.Logger
-}
-
-func InitLogger() {
-	logger := initLogger()
-	Log = &appLogger{logger: logger}
-}
-
-func initLogger() *zerolog.Logger {
-	cfg := config.GetConfig()
-
-	var w zerolog.LevelWriter
-	if cfg.Environment == "dev" {
-		w = zerolog.MultiLevelWriter(zerolog.ConsoleWriter{Out: os.Stdout})
-	} else {
-		w = zerolog.MultiLevelWriter(os.Stdout)
-	}
-
-	logger := zerolog.New(w).Level(loggerLevelMap[cfg.Logger.Level]).With().
-		CallerWithSkipFrameCount(cfg.Logger.SkipFrameCount).Timestamp().Logger()
-	logger.Info().Msgf("Logger initialized: level %s", cfg.Logger.Level)
-	return &logger
 }
 
 // Debugp logs warning with pairs of key value
@@ -65,7 +42,6 @@ func (a *appLogger) Debugp(msg string, keyValue ...interface{}) {
 		setKeyValuesAny(event, key, value)
 	}
 	event.Msgf(msg)
-
 }
 
 // Infop logs info with pairs of key value

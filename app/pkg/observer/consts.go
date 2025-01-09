@@ -11,6 +11,5 @@ var (
 		"state",
 		"sizeCache",
 		"unknownFields",
-		"values",
 	}
 )
